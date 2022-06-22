@@ -1,12 +1,10 @@
-using System;
-
-namespace MyPhotoshop
+namespace MyPhotoshop.Data
 {
 	public class Photo
 	{
-		public int width;
-		public int height;
-		public double[,,] data;
+		public int Width;
+		public int Height;
+		public Pixel[,] Data;
 	}
 }
 

@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using MyPhotoshop.Data;
 
 namespace MyPhotoshop
 {
