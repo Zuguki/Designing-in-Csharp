@@ -2,7 +2,7 @@ using System;
 
 namespace MyPhotoshop.Data
 {
-    public class Pixel
+    public struct Pixel
     {
         private static int LowerBound => 0;
         private static int UpperBound => 1;
@@ -29,12 +29,10 @@ namespace MyPhotoshop.Data
         private double _green;
         private double _blue;
 
-        public Pixel() : this(0, 0, 0)
-        {
-        }
-
         public Pixel(double red, double green, double blue)
         {
+            _red = _green = _blue = LowerBound;
+            
             Red = red;
             Green = green;
             Blue = blue;
