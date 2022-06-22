@@ -28,7 +28,6 @@ namespace MyPhotoshop.Filters
 
             for (var x = 0; x < result.Width; x++)
             for (var y = 0; y < result.Height; y++)
-            for (var z = 0; z < 3; z++)
             {
                 result.Data[x, y] = new Pixel();
                 result.Data[x, y] = original.Data[x, y] * parameters[0];
