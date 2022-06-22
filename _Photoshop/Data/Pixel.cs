@@ -41,6 +41,8 @@ namespace MyPhotoshop.Data
         public static Pixel operator *(Pixel pixel, double ratio) =>
             new Pixel(Trim(pixel.Red * ratio), Trim(pixel.Green * ratio), Trim(pixel.Blue * ratio));
 
+        public static Pixel operator *(double ratio, Pixel pixel) => pixel * ratio;
+
         private static double CheckValue(double value)
         {
             if (value < LowerBound || value > UpperBound)
