@@ -19,19 +19,12 @@ namespace MyPhotoshop.Filters
 
         public Photo Process(Photo original, double[] parameters)
         {
-            var result = new Photo
-            {
-                Width = original.Width,
-                Height = original.Height
-            };
-            result.Data = new Pixel[result.Width, result.Height];
-
+            var result = new Photo(original.Width, original.Height);
+            
             for (var x = 0; x < result.Width; x++)
             for (var y = 0; y < result.Height; y++)
-            {
-                result.Data[x, y] = new Pixel();
-                result.Data[x, y] = original.Data[x, y] * parameters[0];
-            }
+                result[x, y] = original.Data[x, y] * parameters[0];
+            
             return result;
         }
     }
