@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Incapsulation.Failures
@@ -6,9 +7,9 @@ namespace Incapsulation.Failures
     public class Common
     {
         public static int Earlier(object[] v, int day, int month, int year) =>
-            Earlier(new Date((int) v[0], (int) v[1], (int) v[2]), new Date(day, month, year));
+            Earlier(new DateTime((int) v[2], (int) v[1], (int) v[0]), new DateTime(year, month, day));
 
-        public static int Earlier(Date perDate, Date current) =>
+        public static int Earlier(DateTime perDate, DateTime current) =>
             perDate.Day < current.Day || perDate.Month < current.Month || perDate.Year < current.Year ? 1 : 0;
     }
 
@@ -24,10 +25,10 @@ namespace Incapsulation.Failures
             List<Dictionary<string, object>> devices)
         {
             // ---------------------------------------------------------------->
-            var date = new Date(day, month, year);
+            var date = new DateTime(year, month, day);
             var failures = failureTypes
                 .Select((item, index) => new Failure(item, deviceId[index], 
-                    new Date((int) times[index][0], (int) times[index][1], (int) times[index][2])))
+                    new DateTime((int) times[index][2], (int) times[index][1], (int) times[index][0])))
                 .ToList();
             var allDevices = devices
                 .Select(device => 
@@ -35,21 +36,9 @@ namespace Incapsulation.Failures
                 .ToList();
 
             return FindDevicesFailedBeforeDateObsolete(date, failures, allDevices);
-            // ---------------------------------------------------------------->
-            // var problematicDevices = new HashSet<int>();
-            // for (var i = 0; i < failureTypes.Length; i++)
-            //     if (Common.IsFailureSerious(failureTypes[i]) == 1 && Common.Earlier(times[i], day, month, year) == 1)
-            //         problematicDevices.Add(deviceId[i]);
-            //
-            // var result = new List<string>();
-            // foreach (var device in devices)
-            //     if (problematicDevices.Contains((int) device["DeviceId"]))
-            //         result.Add(device["Name"] as string);
-            //
-            // return result;
         }
 
-        public static List<string> FindDevicesFailedBeforeDateObsolete(Date date, List<Failure> failures, 
+        public static List<string> FindDevicesFailedBeforeDateObsolete(DateTime date, List<Failure> failures, 
             List<Device> devices)
         {
             var problematicDevices = new HashSet<int>();
@@ -69,53 +58,13 @@ namespace Incapsulation.Failures
         }
     }
 
-    public class Date
-    {
-        public int Day
-        {
-            get => _day;
-            set => _day = CheckDate(value, 0, 31);
-        }
-
-        public int Month
-        {
-            get => _month;
-            set => _month = CheckDate(value, 1, 12);
-        }
-
-        public int Year
-        {
-            get => _year;
-            set => _year = value;
-        }
-        
-        private int _day;
-        private int _month;
-        private int _year;
-
-        public Date(int day, int month, int year)
-        {
-            Day = day;
-            Month = month;
-            Year = year;
-        }
-
-        private int CheckDate(int value, int lowerBound, int upperBound)
-        {
-            if (value < lowerBound)
-                return lowerBound;
-
-            return value > upperBound ? upperBound : value;
-        }
-    }
-
     public class Failure
     {
         public int FailureType { get; }
         public int DeviceId { get; }
-        public Date Date { get; }
+        public DateTime Date { get; }
 
-        public Failure(int failureType, int deviceId, Date date)
+        public Failure(int failureType, int deviceId, DateTime date)
         {
             FailureType = failureType;
             DeviceId = deviceId;
