@@ -34,7 +34,7 @@ namespace Incapsulation.Failures
             return FindDevicesFailedBeforeDate(date, allDevices);
         }
 
-        public static IEnumerable<string> FindDevicesFailedBeforeDate(DateTime dateTime, IEnumerable<Device> devices)
+        private static IEnumerable<string> FindDevicesFailedBeforeDate(DateTime dateTime, IEnumerable<Device> devices)
         {
             return devices.Where(device => device.FailureType is FailureType.Success).Select(device => device.Name)
                 .ToList();
