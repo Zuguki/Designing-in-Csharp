@@ -1,63 +1,40 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Incapsulation.EnterpriseTask
 {
     public class Enterprise
     {
-        Guid guid;
+        private Guid Guid { get; }
 
-        public Guid getGuid() { return guid; }
+        public Enterprise (Guid guid) =>
+            Guid = guid;
 
-        public Enterprise(Guid guid)
+        public string Name { get; set; }
+
+        public string Inn
         {
-            this.guid = guid;
+            get => _inn;
+            set
+            {
+                if (_inn.Length != 10 || !_inn.All(char.IsDigit))
+                    throw new ArgumentException();
+                _inn = value;
+            }
         }
 
-        string name;
+        private string _inn;
+        
+        public DateTime EstablishDate { get; set; }
 
-        public string getName() { return name; }
+        public TimeSpan GetActiveTimeSpan() => DateTime.Now - EstablishDate;
 
-        public void setName(string name) { this.name = name; }
-
-        string inn;
-
-        public string getINN() { return inn; }
-
-        public void setINN(string inn)
-        {
-            if (inn.Length != 10 || !inn.All(z => char.IsDigit(z)))
-                throw new ArgumentException();
-            this.inn = inn;
-        }
-
-        DateTime establishDate;
-
-        public DateTime getEstablishDate()
-        {
-            return establishDate;
-        }
-
-        public void setEstablishDate(DateTime establishDate)
-        {
-            this.establishDate = establishDate;
-        }
-
-        public TimeSpan getActiveTimeSpan()
-        {
-            return DateTime.Now - establishDate;
-        }
-
-        public double getTotalTransactionsAmount()
+        public double GetTotalTransactionsAmount()
         {
             DataBase.OpenConnection();
-            var amount = 0.0;
-            foreach (Transaction t in DataBase.Transactions().Where(z => z.EnterpriseGuid == guid))
-                amount += t.Amount;
-            return amount;
+            return DataBase.Transactions()
+                .Where(transaction => transaction.EnterpriseGuid == Guid)
+                .Sum(transaction => transaction.Amount);
         }
     }
 }
