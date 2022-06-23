@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NUnit.Framework;
 
 namespace Incapsulation.RationalNumbers
 {
@@ -20,7 +15,7 @@ namespace Incapsulation.RationalNumbers
 
             if (Numerator == 0 && Denominator != 0)
                 Denominator = 1;
-            
+
             if (denominator < 0 && numerator > 0 || denominator < 0 && numerator < 0)
             {
                 Numerator *= -1;
@@ -60,11 +55,11 @@ namespace Incapsulation.RationalNumbers
         {
             if (rational1.IsNan || rational2.IsNan)
                 return new Rational(0, 0);
-            
+
             return new Rational(rational1.Numerator * rational2.Denominator,
                 rational1.Denominator * rational2.Numerator);
         }
-        
+
         public static implicit operator int(Rational p1)
         {
             if (p1.Numerator % p1.Denominator == 0)
@@ -79,7 +74,7 @@ namespace Incapsulation.RationalNumbers
         {
             if (p1.Denominator == 0)
                 return double.NaN;
-            
+
             return (double) p1.Numerator / p1.Denominator;
         }
 
