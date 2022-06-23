@@ -5,8 +5,6 @@ namespace Incapsulation.Weights
 {
     public class Indexer
     {
-        private double[] Doubles { get; }
-        private int Start { get; }
         public int Length { get; }
 
         public Indexer(double[] doubles, int start, int length)
@@ -16,6 +14,9 @@ namespace Incapsulation.Weights
             Start = start;
             Length = length;
         }
+
+        private double[] Doubles { get; }
+        private int Start { get; }
 
         public double this[int index]
         {
