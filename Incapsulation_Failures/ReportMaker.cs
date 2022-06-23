@@ -6,12 +6,12 @@ namespace Incapsulation.Failures
 {
     public class Common
     {
-        public static int Earlier(DateTime perDate, DateTime current) => perDate < current ? 1 : 0;
+        public static int WasEarlier(DateTime perDate, DateTime current) => perDate < current ? 1 : 0;
     }
 
     public class ReportMaker
     {
-        public static List<string> FindDevicesFailedBeforeDateObsolete(
+        public static IEnumerable<string> FindDevicesFailedBeforeDateObsolete(
             int day,
             int month,
             int year,
@@ -24,36 +24,48 @@ namespace Incapsulation.Failures
             var allDevices = new List<Device>();
             for (var index = 0; index < failureTypes.Length; index++)
             {
-                var device = new Device(deviceId[index], devices[index]["Name"] as string, 
+                var device = new Device(devices[index]["Name"] as string, 
                     new DateTime((int) times[index][2], (int) times[index][1], (int) times[index][0]));
-                if (Device.IsFailureSerious(failureTypes[index]) == 1 && Common.Earlier(device.Date, date) == 1)
-                    device.IsFailure = true;
+                device.SetFailureType(failureTypes[index], date);
+                
                 allDevices.Add(device);
             }
 
-            return FindDevicesFailedBeforeDateObsolete(allDevices);
+            return FindDevicesFailedBeforeDate(date, allDevices);
         }
 
-        public static List<string> FindDevicesFailedBeforeDateObsolete(IEnumerable<Device> devices) => 
-            devices.Where(device => device.IsFailure).Select(device => device.Name).ToList();
+        public static IEnumerable<string> FindDevicesFailedBeforeDate(DateTime dateTime, IEnumerable<Device> devices)
+        {
+            return devices.Where(device => device.FailureType is FailureType.Success).Select(device => device.Name)
+                .ToList();
+        }
     }
 
     public class Device
     {
-        public int Id { get; }
         public string Name { get; }
-        
-        public DateTime Date { get; }
-        
-        public bool IsFailure { get; set; }
 
-        public Device(int id, string name, DateTime date)
+        public FailureType FailureType { get; private set; }
+        
+        private DateTime Date { get; }
+
+        public Device(string name, DateTime date)
         {
-            Id = id;
             Name = name;
             Date = date;
         }
+
+        public void SetFailureType(int failureType, DateTime currentDate) =>
+            FailureType = IsFailureSerious(failureType) == 1 && Common.WasEarlier(Date, currentDate) == 1
+                ? FailureType.Success
+                : FailureType.Unsuccessful;
         
-        public static int IsFailureSerious(int failureType) => failureType % 2 == 0 ? 1 : 0;
+        private static int IsFailureSerious(int failureType) => failureType % 2 == 0 ? 1 : 0;
+    }
+
+    public enum FailureType
+    {
+        Success,
+        Unsuccessful
     }
 }
