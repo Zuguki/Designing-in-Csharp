@@ -5,13 +5,14 @@ namespace Incapsulation.EnterpriseTask
 {
     public class Enterprise
     {
-        private Guid Guid { get; }
+        public Guid Guid { get; }
 
         public Enterprise (Guid guid) =>
             Guid = guid;
 
         public string Name { get; set; }
 
+        private string _inn;
         public string Inn
         {
             get => _inn;
@@ -22,12 +23,10 @@ namespace Incapsulation.EnterpriseTask
                 _inn = value;
             }
         }
-
-        private string _inn;
         
         public DateTime EstablishDate { get; set; }
 
-        public TimeSpan GetActiveTimeSpan() => DateTime.Now - EstablishDate;
+        public TimeSpan ActiveTimeSpan => DateTime.Now - EstablishDate;
 
         public double GetTotalTransactionsAmount()
         {
