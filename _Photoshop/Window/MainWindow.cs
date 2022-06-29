@@ -8,43 +8,42 @@ using MyPhotoshop.Data;
 
 namespace MyPhotoshop
 {
-	public class MainWindow : Form
-	{
-		Bitmap originalBmp;
+    public class MainWindow : Form
+    {
+        Bitmap originalBmp;
         Photo originalPhoto;
-		PictureBox original;
-		PictureBox processed;
-		ComboBox filtersSelect;
-		Panel parametersPanel;
-		List<NumericUpDown> parametersControls;
-		Button apply;
-		
-		public MainWindow ()
-		{
-			original=new PictureBox();
-			Controls.Add (original);
-			
-            processed=new PictureBox();
-			Controls.Add(processed);
-			
-            filtersSelect=new ComboBox();
-			filtersSelect.DropDownStyle = ComboBoxStyle.DropDownList;
-			filtersSelect.SelectedIndexChanged+=FilterChanged;
-			Controls.Add (filtersSelect);
+        PictureBox original;
+        PictureBox processed;
+        ComboBox filtersSelect;
+        Panel parametersPanel;
+        List<NumericUpDown> parametersControls;
+        Button apply;
 
-            apply=new Button();
-			apply.Text="Применить";
-			apply.Enabled=false;
-			apply.Click+=Process;
-			Controls.Add (apply);
+        public MainWindow()
+        {
+            original = new PictureBox();
+            Controls.Add(original);
 
-            Text="Photoshop pre-alpha release";
-			FormBorderStyle = FormBorderStyle.FixedDialog;
+            processed = new PictureBox();
+            Controls.Add(processed);
 
-            
+            filtersSelect = new ComboBox();
+            filtersSelect.DropDownStyle = ComboBoxStyle.DropDownList;
+            filtersSelect.SelectedIndexChanged += FilterChanged;
+            Controls.Add(filtersSelect);
 
-            LoadBitmap((Bitmap)Image.FromFile("cat.jpg"));
-		}
+            apply = new Button();
+            apply.Text = "Применить";
+            apply.Enabled = false;
+            apply.Click += Process;
+            Controls.Add(apply);
+
+            Text = "Photoshop pre-alpha release";
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+
+
+            LoadBitmap((Bitmap) Image.FromFile("cat.jpg"));
+        }
 
         public void LoadBitmap(Bitmap bmp)
         {
@@ -76,80 +75,82 @@ namespace MyPhotoshop
             FilterChanged(null, EventArgs.Empty);
         }
 
-        		
-		public void AddFilter(IFilter filter)
-		{
-			filtersSelect.Items.Add(filter);
-			if (filtersSelect.SelectedIndex==-1)
-			{
-				filtersSelect.SelectedIndex=0;
-				apply.Enabled=true;
-			}
-		}
-		
-		void FilterChanged(object sender, EventArgs e)
-		{
-			var filter=(IFilter)filtersSelect.SelectedItem;
-			if (filter==null) return;
-			if (parametersPanel!=null) Controls.Remove (parametersPanel);
-			parametersControls=new List<NumericUpDown>();
-			parametersPanel=new Panel();
-			parametersPanel.Left=filtersSelect.Left;
-			parametersPanel.Top=filtersSelect.Bottom+10;
-			parametersPanel.Width=filtersSelect.Width;
-			parametersPanel.Height=ClientSize.Height-parametersPanel.Top;
-			
-			int y=0;
-			
-			foreach(var param in filter.GetParameters ())
-			{
-				var label=new Label();
-				label.Left=0;
-				label.Top=y;
-				label.Width=parametersPanel.Width-50;
-				label.Height=20;
-				label.Text=param.Name;
-				parametersPanel.Controls.Add (label);
-				
-				var box=new NumericUpDown();
-				box.Left=label.Right;
-				box.Top=y;
-				box.Width=50;
-				box.Height=20;
-				box.Value=(decimal)param.DefaultValue;
-				box.Increment=(decimal)param.Increment/3;
-				box.Maximum=(decimal)param.MaxValue;
-				box.Minimum=(decimal)param.MinValue;
-                box.DecimalPlaces = 2;
-				parametersPanel.Controls.Add (box);
-				y+=label.Height+5;
-				parametersControls.Add(box);
-			}
-			Controls.Add (parametersPanel);
-		}
-		
-		
-		void Process(object sender, EventArgs empty)
-		{
-			var data=parametersControls.Select(z=>(double)z.Value).ToArray();
-			var filter=(IFilter)filtersSelect.SelectedItem;
-			Photo result=null;
-     		result=filter.Process(originalPhoto,data);
-	        var resultBmp=Convertors.Photo2Bitmap(result);
-			if (resultBmp.Width>originalBmp.Width || resultBmp.Height>originalBmp.Height)
-			{
-                float k = Math.Min((float)originalBmp.Width / resultBmp.Width, (float)originalBmp.Height / resultBmp.Height);
-                var newBmp = new Bitmap((int)(resultBmp.Width * k), (int)(resultBmp.Height * k));
-				using(var g = Graphics.FromImage(newBmp))
-				{
-					g.DrawImage(resultBmp, new Rectangle(0, 0, newBmp.Width, newBmp.Height), new Rectangle(0, 0, resultBmp.Width, resultBmp.Height), GraphicsUnit.Pixel);
-				}
-				resultBmp = newBmp;
-			}
-				
-			processed.Image=resultBmp;
-		}
 
-        
-	}
+        public void AddFilter(IFilter filter)
+        {
+            filtersSelect.Items.Add(filter);
+            if (filtersSelect.SelectedIndex == -1)
+            {
+                filtersSelect.SelectedIndex = 0;
+                apply.Enabled = true;
+            }
+        }
+
+        void FilterChanged(object sender, EventArgs e)
+        {
+            var filter = (IFilter) filtersSelect.SelectedItem;
+            if (filter == null) return;
+            if (parametersPanel != null) Controls.Remove(parametersPanel);
+            parametersControls = new List<NumericUpDown>();
+            parametersPanel = new Panel();
+            parametersPanel.Left = filtersSelect.Left;
+            parametersPanel.Top = filtersSelect.Bottom + 10;
+            parametersPanel.Width = filtersSelect.Width;
+            parametersPanel.Height = ClientSize.Height - parametersPanel.Top;
+
+            int y = 0;
+
+            foreach (var param in filter.GetParameters())
+            {
+                var label = new Label();
+                label.Left = 0;
+                label.Top = y;
+                label.Width = parametersPanel.Width - 50;
+                label.Height = 20;
+                label.Text = param.Name;
+                parametersPanel.Controls.Add(label);
+
+                var box = new NumericUpDown();
+                box.Left = label.Right;
+                box.Top = y;
+                box.Width = 50;
+                box.Height = 20;
+                box.Value = (decimal) param.DefaultValue;
+                box.Increment = (decimal) param.Increment / 3;
+                box.Maximum = (decimal) param.MaxValue;
+                box.Minimum = (decimal) param.MinValue;
+                box.DecimalPlaces = 2;
+                parametersPanel.Controls.Add(box);
+                y += label.Height + 5;
+                parametersControls.Add(box);
+            }
+
+            Controls.Add(parametersPanel);
+        }
+
+
+        void Process(object sender, EventArgs empty)
+        {
+            var data = parametersControls.Select(z => (double) z.Value).ToArray();
+            var filter = (IFilter) filtersSelect.SelectedItem;
+            Photo result = null;
+            result = filter.Process(originalPhoto, data);
+            var resultBmp = Convertors.Photo2Bitmap(result);
+            if (resultBmp.Width > originalBmp.Width || resultBmp.Height > originalBmp.Height)
+            {
+                float k = Math.Min((float) originalBmp.Width / resultBmp.Width,
+                    (float) originalBmp.Height / resultBmp.Height);
+                var newBmp = new Bitmap((int) (resultBmp.Width * k), (int) (resultBmp.Height * k));
+                using (var g = Graphics.FromImage(newBmp))
+                {
+                    g.DrawImage(resultBmp, new Rectangle(0, 0, newBmp.Width, newBmp.Height),
+                        new Rectangle(0, 0, resultBmp.Width, resultBmp.Height), GraphicsUnit.Pixel);
+                }
+
+                resultBmp = newBmp;
+            }
+
+            processed.Image = resultBmp;
+        }
+    }
 }
