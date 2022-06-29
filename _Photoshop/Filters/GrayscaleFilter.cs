@@ -7,9 +7,9 @@ namespace MyPhotoshop.Filters
     {
         public override ParameterInfo[] GetParameters() => new ParameterInfo[0];
         
-        protected override Pixel ProcessPixel(int x, int y, Photo original, double[] parameters)
+        protected override Pixel ProcessPixel(Pixel original, double[] parameters)
         {
-            var lightness = original[x, y].Red + original[x, y].Green + original[x, y].Blue;
+            var lightness = original.Red + original.Green + original.Blue;
             lightness /= 3;
             return new Pixel(lightness, lightness, lightness);
         }

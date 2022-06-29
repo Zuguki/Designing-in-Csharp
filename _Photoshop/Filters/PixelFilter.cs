@@ -5,7 +5,7 @@ namespace MyPhotoshop.Filters
     public abstract class PixelFilter : IFilter
     {
         public abstract ParameterInfo[] GetParameters();
-        protected abstract Pixel ProcessPixel(int x, int y, Photo original, double[] parameters);
+        protected abstract Pixel ProcessPixel(Pixel original, double[] parameters);
 
         public Photo Process(Photo original, double[] parameters)
         {
@@ -13,7 +13,7 @@ namespace MyPhotoshop.Filters
 
             for (var x = 0; x < result.Width; x++)
             for (var y = 0; y < result.Height; y++)
-                result[x, y] = ProcessPixel(x, y, original, parameters);
+                result[x, y] = ProcessPixel(original[x, y], parameters);
 
             return result;
         }
