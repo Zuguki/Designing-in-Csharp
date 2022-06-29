@@ -2,12 +2,11 @@ using MyPhotoshop.Data;
 
 namespace MyPhotoshop.Filters
 {
-    public abstract class PixelFilter : IFilter
+    public abstract class PixelFilter : ParametrizedFilter
     {
-        public abstract ParameterInfo[] GetParameters();
-        protected abstract Pixel ProcessPixel(Pixel original, double[] parameters);
+        protected abstract Pixel ProcessPixel(Pixel original, IParameters parameters);
 
-        public Photo Process(Photo original, double[] parameters)
+        public override Photo Process(Photo original, IParameters parameters)
         {
             var result = new Photo(original.Width, original.Height);
 
@@ -17,5 +16,8 @@ namespace MyPhotoshop.Filters
 
             return result;
         }
+
+        public PixelFilter(IParameters parameters) : base(parameters)
+        { }
     }
 }
