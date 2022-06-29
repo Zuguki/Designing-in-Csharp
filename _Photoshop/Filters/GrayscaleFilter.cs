@@ -1,3 +1,4 @@
+using System;
 using MyPhotoshop.Data;
 
 namespace MyPhotoshop.Filters
@@ -8,19 +9,16 @@ namespace MyPhotoshop.Filters
 
         public Photo Process(Photo original, double[] parameters)
         {
-            var result = new Photo(original.Width, original.Height);
-
-            for (var x = 0; x < result.Width; x++)
-            for (var y = 0; y < result.Height; y++)
+            var processPixel = new Func<int, int, Pixel>((x, y) =>
             {
                 var lightness = original[x, y].Red + original[x, y].Green + original[x, y].Blue;
                 lightness /= 3;
-                result[x, y] = new Pixel(lightness, lightness, lightness);
-            }
+                return new Pixel(lightness, lightness, lightness);
+            });
 
-            return result;
+            return Filter.Process(original, processPixel);
         }
-        
+
         public override string ToString() => "Оттенки серого";
     }
 }

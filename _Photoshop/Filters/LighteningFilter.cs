@@ -12,20 +12,9 @@ namespace MyPhotoshop.Filters
             };
         }
 
-        public override string ToString()
-        {
-            return "Осветление/затемнение";
-        }
+        public override string ToString() => "Осветление/затемнение";
 
-        public Photo Process(Photo original, double[] parameters)
-        {
-            var result = new Photo(original.Width, original.Height);
-            
-            for (var x = 0; x < result.Width; x++)
-            for (var y = 0; y < result.Height; y++)
-                result[x, y] = original.Data[x, y] * parameters[0];
-            
-            return result;
-        }
+        public Photo Process(Photo original, double[] parameters) => 
+            Filter.Process(original, (x, y) => original.Data[x, y] * parameters[0]);
     }
 }
