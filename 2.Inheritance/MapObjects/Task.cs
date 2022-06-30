@@ -1,35 +1,44 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Inheritance.MapObjects
 {
-    public class Dwelling
+    internal interface IOwner
+    {
+        int Owner { get; set; }
+    }
+
+    internal interface IArmy
+    {
+        Army Army { get; set; }
+    }
+
+    internal interface ITreasure
+    {
+        Treasure Treasure { get; set; }
+    }
+
+    public class Dwelling : IOwner
     {
         public int Owner { get; set; }
     }
 
-    public class Mine
+    public class Mine : IOwner, IArmy, ITreasure
     {
         public int Owner { get; set; }
         public Army Army { get; set; }
         public Treasure Treasure { get; set; }
     }
 
-    public class Creeps
+    public class Creeps : IArmy, ITreasure
     {
         public Army Army { get; set; }
         public Treasure Treasure { get; set; }
     }
 
-    public class Wolves
+    public class Wolves : IArmy
     {
         public Army Army { get; set; }
     }
 
-    public class ResourcePile
+    public class ResourcePile : ITreasure
     {
         public Treasure Treasure { get; set; }
     }
@@ -38,50 +47,14 @@ namespace Inheritance.MapObjects
     {
         public static void Make(Player player, object mapObject)
         {
-            //Здесь и далее используйте следующий сокращенный синтаксис преобразования типа
-            if (mapObject is Dwelling dwellingObj)
-            {
-                //Он более короткий и позволяет не производить множественных преобразований таких, как
-                //((Dwelling)mapObject).Owner = player.Id;
+            if (mapObject is IArmy army && !player.CanBeat(army.Army))
+                player.Die();
 
-                //а сразу обращаться к объекту, если он является каким-то классом.
-                dwellingObj.Owner = player.Id;
+            if (mapObject is IOwner owner && !player.Dead)
+                owner.Owner = player.Id;
 
-                return;
-            }
-
-            //Перед выполнение задания потренируйтесь и замените неправильное использование is ниже
-            if (mapObject is Mine)
-            {
-                if (player.CanBeat(((Mine)mapObject).Army))
-                {
-                    ((Mine)mapObject).Owner = player.Id;
-                    player.Consume(((Mine)mapObject).Treasure);
-                }
-                else player.Die();
-                return;
-            }
-
-            if (mapObject is Creeps)
-            {
-                if (player.CanBeat(((Creeps)mapObject).Army))
-                    player.Consume(((Creeps)mapObject).Treasure);
-                else
-                    player.Die();
-                return;
-            }
-
-            if (mapObject is ResourcePile)
-            {
-                player.Consume(((ResourcePile)mapObject).Treasure);
-                return;
-            }
-
-            if (mapObject is Wolves)
-            {
-                if (!player.CanBeat(((Wolves)mapObject).Army))
-                    player.Die();
-            }
+            if (mapObject is ITreasure treasure && !player.Dead)
+                player.Consume(treasure.Treasure);
         }
     }
 }
