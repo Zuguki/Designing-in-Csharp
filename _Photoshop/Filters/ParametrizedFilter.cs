@@ -2,23 +2,19 @@ using MyPhotoshop.Data;
 
 namespace MyPhotoshop.Filters
 {
-    public abstract class ParametrizedFilter : IFilter
+    public abstract class ParametrizedFilter<TParameters> : IFilter
+        where TParameters : IParameters, new()
     {
-        private IParameters _parameters;
-
-        protected ParametrizedFilter(IParameters parameters)
-        {
-            _parameters = parameters;
-        }
+        private TParameters _parameters = new TParameters();
 
         public ParameterInfo[] GetParameters() => _parameters.GetDescriptions();
 
-        public Photo Process(Photo original, double[] parameters)
+        public Photo Process(Photo original, double[] values)
         {
-            _parameters.SetValues(parameters);
+            _parameters.SetValues(values);
             return Process(original, _parameters);
         }
 
-        public abstract Photo Process(Photo original, IParameters parameters);
+        public abstract Photo Process(Photo original, TParameters parameters);
     }
 }

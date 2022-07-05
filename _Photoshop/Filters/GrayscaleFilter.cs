@@ -1,20 +1,16 @@
-using System;
 using MyPhotoshop.Data;
 
 namespace MyPhotoshop.Filters
 {
-    public class GrayscaleFilter : PixelFilter
+    public class GrayscaleFilter : PixelFilter<EmptyParameters>
     {
-        protected override Pixel ProcessPixel(Pixel original, IParameters parameters)
+        public override string ToString() => "Оттенки серого";
+
+        protected override Pixel ProcessPixel(Pixel original, EmptyParameters parameters)
         {
             var lightness = original.Red + original.Green + original.Blue;
             lightness /= 3;
             return new Pixel(lightness, lightness, lightness);
         }
-        
-        public override string ToString() => "Оттенки серого";
-
-        public GrayscaleFilter() : base(new EmptyParameters())
-        { }
     }
 }
