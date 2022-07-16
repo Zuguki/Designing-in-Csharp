@@ -106,29 +106,19 @@ namespace Inheritance.Geometry.Virtual
         
         public override RectangularCuboid GetBoundingBox()
         {
-            (double min, double max) x = (10000, -10000);
-            (double min, double max) y = (10000, -10000);
-            (double min, double max) z = (10000, -10000);
+            (double min, double max) x = (0, 0);
+            (double min, double max) y = (0, 0);
+            (double min, double max) z = (0, 0);
 
-            foreach (var part in Parts.Select(pa => pa.GetBoundingBox()))
-            {
-                var minPoint = part.MinPoint;
-                if (minPoint.X < x.min)
-                    x.min = minPoint.X;
-                if (minPoint.Y < y.min)
-                    y.min = minPoint.Y;
-                if (minPoint.Z < z.min)
-                    z.min = minPoint.Z;
+            var boxes = Parts.Select(box => box.GetBoundingBox()).ToList();
+            x.min = boxes.Min(box => box.MinPoint.X);
+            y.min = boxes.Min(box => box.MinPoint.Y);
+            z.min = boxes.Min(box => box.MinPoint.Z);
 
-                var maxPoint = part.MaxPoint;
-                if (maxPoint.X > x.max)
-                    x.max = maxPoint.X;
-                if (maxPoint.Y > y.max)
-                    y.max = maxPoint.Y;
-                if (maxPoint.Z > z.max)
-                    z.max = maxPoint.Z;
-            }
-
+            x.max = boxes.Max(box => box.MaxPoint.X);
+            y.max = boxes.Max(box => box.MaxPoint.Y);
+            z.max = boxes.Max(box => box.MaxPoint.Z);
+            
             return new RectangularCuboid(new Vector3((x.max + x.min) / 2, (y.max + y.min) / 2, (z.max + z.min) / 2),
                 x.max - x.min, y.max - y.min, z.max - z.min);
         }
