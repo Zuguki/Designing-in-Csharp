@@ -138,43 +138,16 @@ namespace Inheritance.Geometry.Visitor
 
     public class BoundingBoxVisitor : IVisitor
     {
-        public RectangularCuboid Visit(Ball ball) => ball.GetBoundingBox();
-
-        public RectangularCuboid Visit(Cylinder cylinder) => cylinder.GetBoundingBox();
-
-        public RectangularCuboid Visit(RectangularCuboid rectangularCuboid) => rectangularCuboid.GetBoundingBox();
-
-        public RectangularCuboid Visit(CompoundBody compoundBody) => compoundBody.GetBoundingBox();
+        public object Visit(Body body) => body.GetBoundingBox();
     }
 
     public class BoxifyVisitor : IVisitor
     {
-        public RectangularCuboid Visit(Ball ball)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public RectangularCuboid Visit(Cylinder cylinder)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public RectangularCuboid Visit(RectangularCuboid rectangularCuboid)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public RectangularCuboid Visit(CompoundBody compoundBody)
-        {
-            throw new System.NotImplementedException();
-        }
+        public object Visit(Body body) => body.GetBoundingBox();
     }
 
     public interface IVisitor
     {
-        RectangularCuboid Visit(Ball ball);
-        RectangularCuboid Visit(Cylinder cylinder);
-        RectangularCuboid Visit(RectangularCuboid rectangularCuboid);
-        RectangularCuboid Visit(CompoundBody compoundBody);
+        object Visit(Body body);
     }
 }
