@@ -143,24 +143,22 @@ namespace Inheritance.Geometry.Visitor
     {
         public object Visit(Body body)
         {
-            if (body is CompoundBody compoundBody)
-            {
-                var c = Cuboids(compoundBody);
-                return new CompoundBody(c);
-            }
-            
-            return body.GetBoundingBox();
+            if (!(body is CompoundBody compoundBody))
+                return body.GetBoundingBox();
+
+            var cuboids = GetCuboids(compoundBody);
+            return new CompoundBody(cuboids);
         }
 
-        private List<Body> Cuboids(CompoundBody compoundBody)
+        private static List<Body> GetCuboids(CompoundBody compoundBody)
         {
             var bodes = new List<Body>();
-            
+
             foreach (var body in compoundBody.Parts)
             {
                 if (body is CompoundBody compBody)
                 {
-                    var updateCompoundBody = new CompoundBody(Cuboids(compBody));
+                    var updateCompoundBody = new CompoundBody(GetCuboids(compBody));
                     bodes.Add(updateCompoundBody);
                 }
                 else
