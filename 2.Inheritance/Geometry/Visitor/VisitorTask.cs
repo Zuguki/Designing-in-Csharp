@@ -1,10 +1,8 @@
-
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Inheritance.Geometry.Visitor
 {
-
     public abstract class Body
     {
         public Vector3 Position { get; }
@@ -39,7 +37,7 @@ namespace Inheritance.Geometry.Visitor
             return length2 <= Radius * Radius;
         }
 
-        public override RectangularCuboid GetBoundingBox() => 
+        public override RectangularCuboid GetBoundingBox() =>
             new RectangularCuboid(Position, Radius * 2, Radius * 2, Radius * 2);
     }
 
@@ -115,7 +113,7 @@ namespace Inheritance.Geometry.Visitor
         public override object Accept(IVisitor visitor) => visitor.Visit(this);
 
         public override bool ContainsPoint(Vector3 point) => Parts.Any(body => body.ContainsPoint(point));
-        
+
         public override RectangularCuboid GetBoundingBox()
         {
             (double min, double max) x = (0, 0);
@@ -130,7 +128,7 @@ namespace Inheritance.Geometry.Visitor
             x.max = boxes.Max(box => box.MaxPoint.X);
             y.max = boxes.Max(box => box.MaxPoint.Y);
             z.max = boxes.Max(box => box.MaxPoint.Z);
-            
+
             return new RectangularCuboid(new Vector3((x.max + x.min) / 2, (y.max + y.min) / 2, (z.max + z.min) / 2),
                 x.max - x.min, y.max - y.min, z.max - z.min);
         }
@@ -143,7 +141,34 @@ namespace Inheritance.Geometry.Visitor
 
     public class BoxifyVisitor : IVisitor
     {
-        public object Visit(Body body) => body.GetBoundingBox();
+        public object Visit(Body body)
+        {
+            if (body is CompoundBody compoundBody)
+            {
+                var c = Cuboids(compoundBody);
+                return new CompoundBody(c);
+            }
+            
+            return body.GetBoundingBox();
+        }
+
+        private List<Body> Cuboids(CompoundBody compoundBody)
+        {
+            var bodes = new List<Body>();
+            
+            foreach (var body in compoundBody.Parts)
+            {
+                if (body is CompoundBody compBody)
+                {
+                    var updateCompoundBody = new CompoundBody(Cuboids(compBody));
+                    bodes.Add(updateCompoundBody);
+                }
+                else
+                    bodes.Add(body.GetBoundingBox());
+            }
+
+            return bodes;
+        }
     }
 
     public interface IVisitor
