@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,9 +5,6 @@ namespace Inheritance.Geometry.Virtual
 {
     public abstract class Body
     {
-        public abstract Vector3 MinPoint { get; }
-        public abstract Vector3 MaxPoint { get; }
-        
         public Vector3 Position { get; }
 
         protected Body(Vector3 position)
@@ -29,9 +25,6 @@ namespace Inheritance.Geometry.Virtual
         {
             Radius = radius;
         }
-
-        public override Vector3 MinPoint => new Vector3(Position.X - Radius, Position.Y - Radius, Position.Z - Radius);
-        public override Vector3 MaxPoint => new Vector3(Position.X + Radius, Position.Y + Radius, Position.Z + Radius);
 
         public override bool ContainsPoint(Vector3 point)
         {
@@ -57,21 +50,15 @@ namespace Inheritance.Geometry.Virtual
             SizeZ = sizeZ;
         }
 
-        public RectangularCuboid(Vector3 position, Vector3 minPoint, Vector3 maxPoint) : base(position)
-        {
-            SizeX = maxPoint.X - minPoint.X;
-            SizeY = maxPoint.Y - minPoint.Y;
-            SizeZ = maxPoint.Z - minPoint.Z;
-        }
+        public Vector3 MinPoint => new Vector3(
+            Position.X - SizeX / 2,
+            Position.Y - SizeY / 2,
+            Position.Z - SizeZ / 2);
 
-        public override Vector3 MinPoint => new Vector3(
-                                                            Position.X - SizeX / 2,
-                                                            Position.Y - SizeY / 2,
-                                                            Position.Z - SizeZ / 2);
-        public override Vector3 MaxPoint => new Vector3(
-                                                            Position.X + SizeX / 2,
-                                                            Position.Y + SizeY / 2,
-                                                            Position.Z + SizeZ / 2);
+        public Vector3 MaxPoint => new Vector3(
+            Position.X + SizeX / 2,
+            Position.Y + SizeY / 2,
+            Position.Z + SizeZ / 2);
 
         public override bool ContainsPoint(Vector3 point) =>
             point >= MinPoint && point <= MaxPoint;
@@ -90,12 +77,6 @@ namespace Inheritance.Geometry.Virtual
             SizeZ = sizeZ;
             Radius = radius;
         }
-
-        public override Vector3 MinPoint =>
-            new Vector3(Position.X - Radius, Position.Y - Radius, Position.Z - SizeZ / 2);
-
-        public override Vector3 MaxPoint =>
-            new Vector3(Position.X + Radius, Position.Y + Radius, MinPoint.Z + SizeZ);
 
         public override bool ContainsPoint(Vector3 point)
         {
@@ -121,15 +102,35 @@ namespace Inheritance.Geometry.Virtual
             Parts = parts;
         }
 
-        public override Vector3 MinPoint => Parts[0].MinPoint;
-        public override Vector3 MaxPoint => Parts[Parts.Count - 1].MaxPoint;
         public override bool ContainsPoint(Vector3 point) => Parts.Any(body => body.ContainsPoint(point));
+        
         public override RectangularCuboid GetBoundingBox()
         {
-            return new RectangularCuboid(
-                new Vector3(Parts[0].Position.X, Parts[0].Position.Y,
-                    (MaxPoint.Z - MinPoint.Z) / 2), MinPoint,
-                MaxPoint);
+            (double min, double max) x = (10000, -10000);
+            (double min, double max) y = (10000, -10000);
+            (double min, double max) z = (10000, -10000);
+
+            foreach (var part in Parts.Select(pa => pa.GetBoundingBox()))
+            {
+                var minPoint = part.MinPoint;
+                if (minPoint.X < x.min)
+                    x.min = minPoint.X;
+                if (minPoint.Y < y.min)
+                    y.min = minPoint.Y;
+                if (minPoint.Z < z.min)
+                    z.min = minPoint.Z;
+
+                var maxPoint = part.MaxPoint;
+                if (maxPoint.X > x.max)
+                    x.max = maxPoint.X;
+                if (maxPoint.Y > y.max)
+                    y.max = maxPoint.Y;
+                if (maxPoint.Z > z.max)
+                    z.max = maxPoint.Z;
+            }
+
+            return new RectangularCuboid(new Vector3((x.max + x.min) / 2, (y.max + y.min) / 2, (z.max + z.min) / 2),
+                x.max - x.min, y.max - y.min, z.max - z.min);
         }
     }
 }
