@@ -35,18 +35,18 @@ namespace Generics.BinaryTrees
 
         private void Add(BinaryTree<T> current, T item)
         {
-            if (current.Value == null)
+            if (current.Value.Equals(0))
             {
-                current = new BinaryTree<T>(current);
+                current.Value = item;
                 return;
             }
             
-            switch (item.CompareTo(current.Value) < 0)
+            switch (item.CompareTo(current.Value) <= 0)
             {
-                case true when current.Left.Value == null:
+                case true when current.Left == null:
                     current.Left = new BinaryTree<T>(current, item);
                     break;
-                case true when current.Left.Value != null:
+                case true when current.Left != null:
                     Add(current.Left, item);
                     break;
             }
@@ -54,10 +54,10 @@ namespace Generics.BinaryTrees
             
             switch (item.CompareTo(current.Value) > 0)
             {
-                case true when current.Right.Value == null:
+                case true when current.Right == null:
                     current.Right = new BinaryTree<T>(current, item);
                     break;
-                case true when current.Right.Value != null:
+                case true when current.Right != null:
                     Add(current.Right, item);
                     break;
             }
@@ -65,13 +65,30 @@ namespace Generics.BinaryTrees
 
         public IEnumerator<T> GetEnumerator()
         {
-            var left = Left;
-            while (left != null)
-                left = left.Left;
+            if (Left != null)
+                foreach (var node in Left)
+                    yield return node;
+
+            yield return Value;
             
-            yield break;
+            if (Right != null)
+                foreach (var node in Right)
+                    yield return node;
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    }
+
+    public class BinaryTree
+    {
+        public static BinaryTree<T> Create<T>(params T[] items)
+            where T : IComparable
+        {
+            var bt = new BinaryTree<T>();
+            foreach (var item in items)
+                bt.Add(item);
+
+            return bt;
+        }
     }
 }
