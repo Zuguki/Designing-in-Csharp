@@ -74,7 +74,7 @@ namespace Generics.Tables
             table.AddColumn(1);
             Assert.Throws(typeof(ArgumentException), () => Console.Write(table.Existed["1", 1]));
         }
-
+    
         [Test]
         public void FailIfGettingFromNonExistingColumn()
         {
@@ -82,7 +82,7 @@ namespace Generics.Tables
             table.AddRow("1");
             Assert.Throws(typeof(ArgumentException), () => Console.Write(table.Existed["1", 1]));
         }
-
+    
         [Test]
         public void FailIfSettingToNonExistingRow()
         {
@@ -90,7 +90,7 @@ namespace Generics.Tables
             table.AddColumn(1);
             Assert.Throws(typeof(ArgumentException), () => table.Existed["1", 1] = 1);
         }
-
+    
         [Test]
         public void FailIfSettingToNonExistingColumn()
         {
@@ -98,7 +98,7 @@ namespace Generics.Tables
             table.AddRow("1");
             Assert.Throws(typeof(ArgumentException), () => table.Existed["1", 1] = 1);
         }
-
+    
         [Test]
         public void SetToExistedRowAndColumn()
         {
@@ -108,7 +108,7 @@ namespace Generics.Tables
             table.Existed["1", 1] = 1;
             Assert.AreEqual(1, table.Existed["1", 1]);
         }
-
+    
         [Test]
         public void GetDefaultIfNoValueSet()
         {
@@ -118,7 +118,7 @@ namespace Generics.Tables
             Assert.AreEqual(0, table.Existed["1", 1]);
         }
     }
-
+    
     [TestFixture]
     public class TableBothIndices_should
     {
@@ -131,7 +131,7 @@ namespace Generics.Tables
             table.Existed["1", 1] = 2;
             Assert.AreEqual(2, table.Open["1", 1]);
         }
-
+    
         [Test]
         public void WorkTogether2()
         {
@@ -139,7 +139,7 @@ namespace Generics.Tables
             table.Open["1", 1] = 2;
             Assert.AreEqual(2, table.Existed["1", 1]);
         }
-
+    
         [Test]
         public void WorkTogether3()
         {
