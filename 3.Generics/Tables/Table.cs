@@ -16,23 +16,48 @@ namespace Generics.Tables
 
         public Table<TRow, TColumn, TValue> Open => this;
 
+        public Table<TRow, TColumn, TValue> Existed => this;
+
         public TValue this[TRow row, TColumn column]
         {
-            get => _items.First(item => item.Row.Equals(row) && item.Column.Equals(column)).Value;
+            get
+            {
+                if (Rows.Contains(row) && Columns.Contains(column) 
+                    && _items.Any(item => item.Row.Equals(row) && item.Column.Equals(column)))
+                    return _items.First(item 
+                        => item.Row.Equals(row) && item.Column.Equals(column)).Value;
+                
+                return default;
+            }
             set
             {
-                if (!_items.Any(item => item.Row.Equals(row) && item.Column.Equals(column)))
+                if (Rows.Contains(row) && Columns.Contains(column))
                 {
-                    _items.Add(new TableData<TRow, TColumn, TValue>(row, column, value));
-                    Rows.Add(default);
-                    Columns.Add(default);
+                    if (_items.Any(item => item.Row.Equals(row) && item.Column.Equals(column)))
+                        _items.First(item => item.Row.Equals(row) && item.Column.Equals(column))
+                            .Value = value;
+                    else
+                        _items.Add(new TableData<TRow, TColumn, TValue>(row, column, value));
                 }
                 else
                 {
-                    _items.First(item 
-                        => item.Row.Equals(row) && item.Column.Equals(column)).Value = value;
+                    _items.Add(new TableData<TRow, TColumn, TValue>(row, column, value));
+                    AddRow(row);
+                    AddColumn(column);
                 }
             }
+        }
+
+        public void AddRow(TRow row)
+        {
+            if (!Rows.Contains(row))
+                Rows.Add(row);
+        }
+
+        public void AddColumn(TColumn column)
+        {
+            if (!Columns.Contains(column))
+                Columns.Add(column);
         }
     }
 
