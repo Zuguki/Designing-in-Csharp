@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Generics.Tables
@@ -12,7 +13,7 @@ namespace Generics.Tables
 
         public TableOpen<TRow, TColumn, TValue> Open => new TableOpen<TRow, TColumn, TValue>(this);
 
-        public Table<TRow, TColumn, TValue> Existed => this;
+        public TableExisted<TRow, TColumn, TValue> Existed => new TableExisted<TRow, TColumn, TValue>(this);
 
         public void AddRow(TRow row)
         {
@@ -79,6 +80,41 @@ namespace Generics.Tables
                 }
             }
         }
+    }
 
+    public class TableExisted<TRow, TColumn, TValue>
+    {
+        private Table<TRow, TColumn, TValue> _table;
+
+        public TableExisted(Table<TRow, TColumn, TValue> table)
+        {
+            _table = table;
+        }
+
+        public TValue this[TRow row, TColumn column]
+        {
+            get
+            {
+                if (_table.Rows.Contains(row) && _table.Columns.Contains(column))
+                    return _table.Items.Any(item => item.Row.Equals(row) && item.Column.Equals(column))
+                        ? _table.Items.First(item => item.Row.Equals(row) && item.Column.Equals(column)).Value
+                        : default;
+
+                throw new ArgumentException();
+            }
+            set
+            {
+                if (_table.Rows.Contains(row) && _table.Columns.Contains(column))
+                {
+                    if (_table.Items.Any(item => item.Row.Equals(row) && item.Column.Equals(column)))
+                        _table.Items.First(item => item.Row.Equals(row) && item.Column.Equals(column))
+                            .Value = value;
+                    else
+                        _table.Items.Add(new TableData<TRow, TColumn, TValue>(row, column, value));
+                }
+                else
+                    throw new ArgumentException();
+            }
+        }
     }
 }
