@@ -19,7 +19,7 @@ namespace Generics.Robots
     }
 
     public class BuilderAI : IRobotAI<BuilderCommand>
-    { 
+    {
         private int _counter = 1;
 
         public BuilderCommand GetCommand()
@@ -49,7 +49,7 @@ namespace Generics.Robots
         {
             if (command == null)
                 throw new ArgumentException();
-            
+
             var hide = command.ShouldHide ? "YES" : "NO";
             return $"MOV {command.Destination.X}, {command.Destination.Y}, USE COVER {hide}";
         }
@@ -73,7 +73,7 @@ namespace Generics.Robots
                 var command = _ai.GetCommand();
                 if (command == null)
                     break;
-                
+
                 yield return _device.ExecuteCommand(command);
             }
         }
@@ -81,9 +81,9 @@ namespace Generics.Robots
 
     public static class Robot
     {
-         public static Robot<TCommand> Create<TCommand>(IRobotAI<TCommand> ai, IDevice<TCommand> executor)
-         {
-             return new Robot<TCommand>(ai, executor);
-         }       
+        public static Robot<TCommand> Create<TCommand>(IRobotAI<TCommand> ai, IDevice<TCommand> executor)
+        {
+            return new Robot<TCommand>(ai, executor);
+        }
     }
 }
