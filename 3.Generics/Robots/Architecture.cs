@@ -10,21 +10,21 @@ namespace Generics.Robots
 
     public class ShooterAI : IRobotAI<ShooterCommand>
     {
-        int counter = 1;
+        private int _counter = 1;
 
         public ShooterCommand GetCommand()
         {
-            return ShooterCommand.ForCounter(counter++);
+            return ShooterCommand.ForCounter(_counter++);
         }
     }
 
     public class BuilderAI : IRobotAI<BuilderCommand>
-    {
-        int counter = 1;
+    { 
+        private int _counter = 1;
 
         public BuilderCommand GetCommand()
         {
-            return BuilderCommand.ForCounter(counter++);
+            return BuilderCommand.ForCounter(_counter++);
         }
     }
 
@@ -45,43 +45,45 @@ namespace Generics.Robots
 
     public class ShooterMover : IDevice<IShooterMoveCommand>
     {
-        public string ExecuteCommand(IShooterMoveCommand _command)
+        public string ExecuteCommand(IShooterMoveCommand command)
         {
-            if (_command == null)
+            if (command == null)
                 throw new ArgumentException();
             
-            var hide = _command.ShouldHide ? "YES" : "NO";
-            return $"MOV {_command.Destination.X}, {_command.Destination.Y}, USE COVER {hide}";
+            var hide = command.ShouldHide ? "YES" : "NO";
+            return $"MOV {command.Destination.X}, {command.Destination.Y}, USE COVER {hide}";
         }
     }
 
-    public class Robot
+    public class Robot<T>
     {
-        private readonly IRobotAI<object> ai;
-        private readonly IDevice<object> device;
-        private Type _type;
+        private readonly IRobotAI<T> _ai;
+        private readonly IDevice<T> _device;
 
-        private Robot(IRobotAI<object> ai, IDevice<object> executor)
+        public Robot(IRobotAI<T> ai, IDevice<T> executor)
         {
-            this.ai = ai;
-            device = executor;
+            _ai = ai;
+            _device = executor;
         }
 
         public IEnumerable<string> Start(int steps)
         {
             for (var i = 0; i < steps; i++)
             {
-                var command = ai.GetCommand();
+                var command = _ai.GetCommand();
                 if (command == null)
                     break;
                 
-                yield return device.ExecuteCommand(command as IMoveCommand);
+                yield return _device.ExecuteCommand(command);
             }
         }
+    }
 
-        public static Robot Create<TCommand>(IRobotAI<object> ai, IDevice<TCommand> executor)
-        {
-            return new Robot(ai, executor);
-        }
+    public static class Robot
+    {
+         public static Robot<TCommand> Create<TCommand>(IRobotAI<TCommand> ai, IDevice<TCommand> executor)
+         {
+             return new Robot<TCommand>(ai, executor);
+         }       
     }
 }

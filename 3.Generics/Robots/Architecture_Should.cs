@@ -15,9 +15,9 @@ namespace Generics.Robots
         {
             var robot = Robot.Create<IShooterMoveCommand>(new ShooterAI(), new ShooterMover());
             var result = robot.Start(5);
-
+            
             string ShouldHide(int step) => step % 3 == 0 ? "YES" : "NO";
-
+            
             var dueResult = Enumerable.Range(1, 5).Select(z => $"MOV {z * 2}, {z * 3}, USE COVER {ShouldHide(z)}");
             CollectionAssert.AreEqual(dueResult, result);
         }
