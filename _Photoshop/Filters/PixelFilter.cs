@@ -7,9 +7,9 @@ namespace MyPhotoshop.Filters
         where TParameters : IParameters, new()
     {
         private readonly string _name;
-        private Func<Pixel, TParameters, Pixel> _processor;
+        private readonly Func<Pixel, TParameters, Pixel> _processor;
 
-        protected PixelFilter(string name, Func<Pixel, TParameters, Pixel> processor)
+        public PixelFilter(string name, Func<Pixel, TParameters, Pixel> processor)
         {
             _name = name;
             _processor = processor;
