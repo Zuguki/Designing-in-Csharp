@@ -25,13 +25,13 @@ namespace MyPhotoshop
                 }));
             
             window.AddFilter(new TransformFilter(
+                "Отразить по горизонтали",
                 size => size,
-                (point, size) => new Point(size.Width - point.X - 1, point.Y),
-                "Отразить по горизонтали"));
+                (point, size) => new Point(size.Width - point.X - 1, point.Y)));
             window.AddFilter(new TransformFilter(
+                "Отразить по ч.с",
                 size => new Size(size.Height, size.Width),
-                (point, size) => new Point(point.Y, point.X),
-                "Отразить по ч.с"));
+                (point, size) => new Point(point.Y, point.X)));
 
             window.AddFilter(new TransformFilter<RotationParameters>(
                 "Свободное вращение", new RotateTransformer()));
