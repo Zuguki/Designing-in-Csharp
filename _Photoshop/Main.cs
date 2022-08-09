@@ -28,6 +28,10 @@ namespace MyPhotoshop
                 size => size,
                 (point, size) => new Point(size.Width - point.X - 1, point.Y),
                 "Отразить по горизонтали"));
+            window.AddFilter(new TransformFilter(
+                size => new Size(size.Height, size.Width),
+                (point, size) => new Point(point.Y, point.X),
+                "Отразить по ч.с"));
             Application.Run(window);
         }
     }
