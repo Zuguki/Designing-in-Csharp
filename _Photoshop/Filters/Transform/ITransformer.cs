@@ -7,8 +7,8 @@ namespace MyPhotoshop.Filters
     {
         void Prepare(Size size, TParameters parameters);
         
-        Size Result { get; }
+        Size ResultSize { get; }
         
-        Point PointMap(Point newPoint);
+        Point? PointMap(Point newPoint);
     }
 }

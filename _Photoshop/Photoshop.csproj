@@ -45,6 +45,7 @@
     <Compile Include="Filters\ParametrizedFilter.cs" />
     <Compile Include="Filters\PixelFilter.cs" />
     <Compile Include="Filters\Transform\ITransformer.cs" />
+    <Compile Include="Filters\Transform\RotateTransformer.cs" />
     <Compile Include="Filters\Transform\RotationParameters.cs" />
     <Compile Include="Filters\Transform\TransformFilter.cs" />
     <Compile Include="Main.cs" />
