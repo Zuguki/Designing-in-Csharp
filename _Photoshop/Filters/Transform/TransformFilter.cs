@@ -7,16 +7,13 @@ namespace MyPhotoshop.Filters
     public class TransformFilter<TParameters> : ParametrizedFilter<TParameters>
         where TParameters : IParameters, new()
     {
-        private readonly Func<Size, TParameters, Size> _sizeTransform;
-        private readonly Func<Point, Size, TParameters, Point?> _pointTransform;
         private readonly string _name;
+        private ITransformer<TParameters> _transformer;
 
-        public TransformFilter(Func<Size, TParameters, Size> sizeTransform,
-            Func<Point, Size, TParameters, Point?> pointTransform, string name)
+        public TransformFilter(string name, ITransformer<TParameters> transformer)
         {
-            _sizeTransform = sizeTransform;
-            _pointTransform = pointTransform;
             _name = name;
+            _transformer = transformer;
         }
 
         public override string ToString() => _name;
@@ -24,15 +21,15 @@ namespace MyPhotoshop.Filters
         public override Photo Process(Photo original, TParameters parameters)
         {
             var oldSize = new Size(original.Width, original.Height);
-            var newSize = _sizeTransform(oldSize, parameters);
-            var result = new Photo(newSize.Width, newSize.Height);
+            _transformer.Prepare(oldSize, parameters);
+            var result = new Photo(_transformer.ResultSize.Width, _transformer.ResultSize.Height);
 
-            for (var x = 0; x < newSize.Width; x++)
+            for (var x = 0; x < _transformer.ResultSize.Width; x++)
             {
-                for (var y = 0; y < newSize.Height; y++)
+                for (var y = 0; y < _transformer.ResultSize.Height; y++)
                 {
                     var point = new Point(x, y);
-                    var oldPoint = _pointTransform(point, oldSize, parameters);
+                    var oldPoint = _transformer.MapPoint(point);
                     if (oldPoint.HasValue)
                         result[x, y] = original[oldPoint.Value.X, oldPoint.Value.Y];
                 }

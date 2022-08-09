@@ -11,7 +11,7 @@ namespace MyPhotoshop.Filters
 
         public double Angle { get; private set; }
 
-        public Point? PointMap(Point point)
+        public Point? MapPoint(Point point)
         {
             var newSize = ResultSize;
             point = new Point(point.X - newSize.Width / 2, point.Y - newSize.Height / 2);

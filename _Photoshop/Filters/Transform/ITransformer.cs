@@ -9,6 +9,6 @@ namespace MyPhotoshop.Filters
         
         Size ResultSize { get; }
         
-        Point? PointMap(Point newPoint);
+        Point? MapPoint(Point newPoint);
     }
 }
