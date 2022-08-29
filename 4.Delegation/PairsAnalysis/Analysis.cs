@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Delegates.PairsAnalysis
 {
@@ -19,7 +17,7 @@ namespace Delegates.PairsAnalysis
         {
             var pairs = data.Pairs();
             var collection = pairs.MakeCollection((value1, value2) => (value2 - value1) / value1).ToList();
-            return collection.Sum() / collection.Count;
+            return collection.Average();
         }
     }
 
@@ -38,14 +36,10 @@ namespace Delegates.PairsAnalysis
 
         public static IEnumerable<Tuple<T, T>> Pairs<T>(this IEnumerable<T> items)
         {
-            var itemsArray = items as T[] ?? items.ToArray();
-            if (itemsArray.Length < 2)
-                throw new InvalidOperationException();
-
             var previewItem = default(T);
             var counter = 0;
 
-            foreach (var item in itemsArray)
+            foreach (var item in items)
             {
                 if (counter++ == 0)
                 {
