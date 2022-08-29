@@ -11,39 +11,31 @@ namespace Delegates.PairsAnalysis
         public static int FindMaxPeriodIndex(params DateTime[] data)
         {
             var pairs = data.Pairs();
-            return pairs.MaxIndex();
-            return new MaxPauseFinder().Analyze(data);
+            var collection = pairs.MakeCollection((date1, date2) => (date2 - date1).TotalSeconds);
+            return collection.MaxIndex();
         }
 
         public static double FindAverageRelativeDifference(params double[] data)
         {
-            return new AverageDifferenceFinder().Analyze(data);
+            var pairs = data.Pairs();
+            var collection = pairs.MakeCollection((value1, value2) => (value2 - value1) / value1).ToList();
+            return collection.Sum() / collection.Count;
         }
     }
 
     public static class Extention
     {
-        public static int MaxIndex(this IEnumerable<Tuple<DateTime, DateTime>> items)
+        public static int MaxIndex<T>(this IEnumerable<T> items)
+        where T : IComparable<T>
         {
-            var itemsArray = items as Tuple<DateTime, DateTime>[] ?? items.ToArray();
-            if (itemsArray.Length == 0)
-                throw new ArgumentException();
-
-            var maxIndex = 0;
-            var maxValue = 0d;
-            for (var index = 0; index < itemsArray.Length; index++)
-            {
-                var value = Math.Abs((itemsArray[index].Item1 - itemsArray[index].Item2).TotalSeconds);
-                if (value <= maxValue) 
-                    continue;
-                
-                maxValue = value;
-                maxIndex = index;
-            }
-
-            return maxIndex;
+            return items.Select((value, index) => new {Value = value, Index = index})
+                .Aggregate((a, b) => a.Value.CompareTo(b.Value) > 0 ? a : b)
+                .Index;
         }
-        
+
+        public static IEnumerable<TOut> MakeCollection<TIn, TOut>(this IEnumerable<Tuple<TIn, TIn>> pairs,
+            Func<TIn, TIn, TOut> process) => pairs.Select(item => process(item.Item1, item.Item2));
+
         public static IEnumerable<Tuple<T, T>> Pairs<T>(this IEnumerable<T> items)
         {
             var itemsArray = items as T[] ?? items.ToArray();
