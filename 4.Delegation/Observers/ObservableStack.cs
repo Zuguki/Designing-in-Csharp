@@ -7,19 +7,15 @@ using System.Threading.Tasks;
 
 namespace Delegates.Observers
 {
-
 	public class StackOperationsLogger
 	{
-		private readonly Observer observer = new Observer();
+		private readonly Observer _observer = new Observer();
 		public void SubscribeOn<T>(ObservableStack<T> stack)
 		{
-			stack.Add(observer);
+			stack.Add(_observer);
 		}
 
-		public string GetLog()
-		{
-			return observer.Log.ToString();
-		}
+		public string GetLog() => _observer.Log.ToString();
 	}
 
 	public interface IObserver
@@ -29,7 +25,7 @@ namespace Delegates.Observers
 
 	public class Observer : IObserver
 	{
-		public StringBuilder Log = new StringBuilder();
+		public readonly StringBuilder Log = new StringBuilder();
 
 		public void HandleEvent(object eventData)
 		{
@@ -44,45 +40,40 @@ namespace Delegates.Observers
 		void Notify(object eventData);
 	}
 
-
 	public class ObservableStack<T> : IObservable
 	{
-		List<IObserver> observers = new List<IObserver>();
+		private readonly List<IObserver> _observers = new List<IObserver>();
+		private readonly List<T> _data = new List<T>();
 
 		public void Add(IObserver observer)
 		{
-			observers.Add(observer);
+			_observers.Add(observer);
 		}
 
 		public void Notify(object eventData)
 		{
-			foreach (var observer in observers)
+			foreach (var observer in _observers)
 				observer.HandleEvent(eventData);
 		}
 
 		public void Remove(IObserver observer)
 		{
-			observers.Remove(observer);
+			_observers.Remove(observer);
 		}
-
-		List<T> data = new List<T>();
 
 		public void Push(T obj)
 		{
-			data.Add(obj);
+			_data.Add(obj);
 			Notify(new StackEventData<T> { IsPushed = true, Value = obj });
 		}
 
 		public T Pop()
 		{
-			if (data.Count == 0)
+			if (_data.Count == 0)
 				throw new InvalidOperationException();
-			var result = data[data.Count - 1];
+			var result = _data[_data.Count - 1];
 			Notify(new StackEventData<T> { IsPushed = false, Value = result });
 			return result;
-
 		}
 	}
-
-
 }
