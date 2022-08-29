@@ -1,8 +1,5 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Delegates.TreeTraversal
 {
@@ -13,10 +10,10 @@ namespace Delegates.TreeTraversal
             if (root == null)
                 yield break;
 
-            foreach (var product in root.Categories.SelectMany(GetProducts))
-                yield return product;
-
             foreach (var product in root.Products)
+                yield return product;
+            
+            foreach (var product in root.Categories.SelectMany(GetProducts))
                 yield return product;
         }
 
@@ -27,9 +24,9 @@ namespace Delegates.TreeTraversal
 
             if (root.Subjobs.Count == 0)
                 yield return root;
-            else
-                foreach (var endJob in root.Subjobs.SelectMany(GetEndJobs))
-                    yield return endJob;
+
+            foreach (var endJob in root.Subjobs.SelectMany(GetEndJobs))
+                yield return endJob;
         }
 
         public static IEnumerable<T> GetBinaryTreeValues<T>(BinaryTree<T> root)
