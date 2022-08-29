@@ -2,24 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Delegates.Reports
 {
-	public class HtmlReportMaker
+	public abstract class ReportMaker
 	{
-		public string Caption { get; }
-
-		private static string BeginList => "<ul>";
-		private static string EndList => "</ul>";
-
-		private readonly Func<IEnumerable<double>, object> _statistics;
-
-		public HtmlReportMaker(string caption, Func<IEnumerable<double>, object> statistics)
-		{
-			Caption = caption;
-			_statistics = statistics;
-		}
+		protected abstract string Caption { get; }
+		protected abstract string BeginList { get; }
+		protected abstract string EndList { get; }
+		protected abstract Func<IEnumerable<double>, object> StatisticsFunc { get; }
+		protected abstract string MakeCaption(string caption);
+		protected abstract string MakeItem(string valueType, string entry);
 
 		public string MakeReport(IEnumerable<Measurement> data)
 		{
@@ -27,47 +20,49 @@ namespace Delegates.Reports
 			var result = new StringBuilder();
 			result.Append(MakeCaption(Caption));
 			result.Append(BeginList);
-			result.Append(MakeItem("Temperature", _statistics(list.Select(z => z.Temperature)).ToString()));
-			result.Append(MakeItem("Humidity", _statistics(list.Select(z => z.Humidity)).ToString()));
+			result.Append(MakeItem("Temperature", StatisticsFunc(list.Select(z => z.Temperature)).ToString()));
+			result.Append(MakeItem("Humidity", StatisticsFunc(list.Select(z => z.Humidity)).ToString()));
 			result.Append(EndList);
 			return result.ToString();
 		}
+	}
+	
+	public class HtmlReportMaker : ReportMaker
+	{
+		protected override string Caption { get; }
+		protected override Func<IEnumerable<double>, object> StatisticsFunc { get; }
 
-		private static string MakeCaption(string caption) => $"<h1>{caption}</h1>";
-		
-		private static string MakeItem(string valueType, string entry) => $"<li><b>{valueType}</b>: {entry}";
+		protected override string BeginList => "<ul>";
+		protected override string EndList => "</ul>";
+
+		public HtmlReportMaker(string caption, Func<IEnumerable<double>, object> statisticsFunc)
+		{
+			Caption = caption;
+			StatisticsFunc = statisticsFunc;
+		}
+
+		protected override string MakeCaption(string caption) => $"<h1>{caption}</h1>";
+
+		protected override string MakeItem(string valueType, string entry) => $"<li><b>{valueType}</b>: {entry}";
 	}
 
-	public class MarkdownReportMaker
+	public class MarkdownReportMaker : ReportMaker
 	{
-		public string Caption { get; }
+		protected override string Caption { get; }
+		protected override Func<IEnumerable<double>, object> StatisticsFunc { get; }
 
-		private static string BeginList => "";
-		private static string EndList => "";
+		protected override string BeginList => "";
+		protected override string EndList => "";
 
-		private readonly Func<IEnumerable<double>, object> _statistics;
-
-		public MarkdownReportMaker(string caption, Func<IEnumerable<double>, object> statistics)
+		public MarkdownReportMaker(string caption, Func<IEnumerable<double>, object> statisticsFunc)
 		{
 			Caption = caption;
-			_statistics = statistics;
+			StatisticsFunc = statisticsFunc;
 		}
 
-		public string MakeReport(IEnumerable<Measurement> data)
-		{
-			var list = data.ToList();
-			var result = new StringBuilder();
-			result.Append(MakeCaption(Caption));
-			result.Append(BeginList);
-			result.Append(MakeItem("Temperature", _statistics(list.Select(z => z.Temperature)).ToString()));
-			result.Append(MakeItem("Humidity", _statistics(list.Select(z => z.Humidity)).ToString()));
-			result.Append(EndList);
-			return result.ToString();
-		}
+		protected override string MakeCaption(string caption) => $"## {caption}\n\n";
 
-		private static string MakeCaption(string caption) => $"## {caption}\n\n";
-		
-		private static string MakeItem(string valueType, string entry) => $" * **{valueType}**: {entry}\n\n";
+		protected override string MakeItem(string valueType, string entry) => $" * **{valueType}**: {entry}\n\n";
 	}
 
 	public static class ReportMakerHelper
