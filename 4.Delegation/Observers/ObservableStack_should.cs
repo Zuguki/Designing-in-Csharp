@@ -30,7 +30,6 @@ namespace Delegates.Observers
 			stack.Pop();
 			stack.Push(10);
 			Assert.AreEqual("+1+2-2+10", helper.GetLog());
-
 		}
 	}
 }

@@ -4,67 +4,33 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NUnit.Framework.Internal;
 
 namespace Delegates.Observers
-{
+{	
 	public class StackOperationsLogger
 	{
-		private readonly Observer _observer = new Observer();
+		private readonly StringBuilder _log = new StringBuilder();
+
 		public void SubscribeOn<T>(ObservableStack<T> stack)
 		{
-			stack.Add(_observer);
+			stack.HandleEvent += (eventData) => _log.Append(eventData);
 		}
 
-		public string GetLog() => _observer.Log.ToString();
+		public string GetLog() => _log.ToString();
 	}
 
-	public interface IObserver
+	public class ObservableStack<T>
 	{
-		void HandleEvent(object eventData);
-	}
-
-	public class Observer : IObserver
-	{
-		public readonly StringBuilder Log = new StringBuilder();
-
-		public void HandleEvent(object eventData)
-		{
-			Log.Append(eventData);
-		}
-	}
-
-	public interface IObservable
-	{
-		void Add(IObserver observer);
-		void Remove(IObserver observer);
-		void Notify(object eventData);
-	}
-
-	public class ObservableStack<T> : IObservable
-	{
-		private readonly List<IObserver> _observers = new List<IObserver>();
+		public delegate void HandleDelegate(object eventData);
+		public event HandleDelegate HandleEvent;
+		
 		private readonly List<T> _data = new List<T>();
-
-		public void Add(IObserver observer)
-		{
-			_observers.Add(observer);
-		}
-
-		public void Notify(object eventData)
-		{
-			foreach (var observer in _observers)
-				observer.HandleEvent(eventData);
-		}
-
-		public void Remove(IObserver observer)
-		{
-			_observers.Remove(observer);
-		}
 
 		public void Push(T obj)
 		{
 			_data.Add(obj);
-			Notify(new StackEventData<T> { IsPushed = true, Value = obj });
+			HandleEvent?.Invoke(new StackEventData<T> {IsPushed = true, Value = obj});
 		}
 
 		public T Pop()
@@ -72,7 +38,7 @@ namespace Delegates.Observers
 			if (_data.Count == 0)
 				throw new InvalidOperationException();
 			var result = _data[_data.Count - 1];
-			Notify(new StackEventData<T> { IsPushed = false, Value = result });
+			HandleEvent?.Invoke(new StackEventData<T> {IsPushed = false, Value = result});
 			return result;
 		}
 	}
