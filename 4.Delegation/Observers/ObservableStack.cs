@@ -18,7 +18,7 @@ namespace Delegates.Observers
 
 	public class ObservableStack<T>
 	{
-		public EventHandler<object> HandleEvent;
+		public event EventHandler<object> HandleEvent;
 		
 		private readonly List<T> _data = new List<T>();
 
