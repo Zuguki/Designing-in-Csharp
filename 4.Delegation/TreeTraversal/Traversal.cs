@@ -20,7 +20,16 @@ namespace Delegates.TreeTraversal
 
         public static IEnumerable<T> GetBinaryTreeValues<T>(BinaryTree<T> root)
         {
-            throw new NotImplementedException();
+            if (root == null)
+                yield break;
+
+            if (root.Left == null || root.Right == null)
+                yield return root.Value;
+
+            foreach (var left in GetBinaryTreeValues(root.Left))
+                yield return left;
+            foreach (var right in GetBinaryTreeValues(root.Right))
+                yield return right;
         }
     }
 }
