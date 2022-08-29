@@ -53,26 +53,36 @@ namespace Delegates.Reports
 		}
 	}
 
-	public class MedianMarkdownReportMaker : ReportMaker
+	public class MarkdownReportMaker
 	{
-		protected override string Caption => "Median";
+		public string Caption { get; }
 
-		protected override string BeginList() => "";
+		private static string BeginList => "";
+		private static string EndList => "";
 
-		protected override string EndList() => "";
+		private readonly Func<IEnumerable<double>, object> _statistics;
 
-		protected override string MakeCaption(string caption) => $"## {caption}\n\n";
-
-		protected override string MakeItem(string valueType, string entry) => $" * **{valueType}**: {entry}\n\n";
-
-		protected override object MakeStatistics(IEnumerable<double> data)
+		public MarkdownReportMaker(string caption, Func<IEnumerable<double>, object> statistics)
 		{
-			var list = data.OrderBy(z => z).ToList();
-			if (list.Count % 2 == 0)
-				return (list[list.Count / 2] + list[list.Count / 2 - 1]) / 2;
-			
-			return list[list.Count / 2];
+			Caption = caption;
+			_statistics = statistics;
 		}
+
+		public string MakeReport(IEnumerable<Measurement> data)
+		{
+			var list = data.ToList();
+			var result = new StringBuilder();
+			result.Append(MakeCaption(Caption));
+			result.Append(BeginList);
+			result.Append(MakeItem("Temperature", _statistics(list.Select(z => z.Temperature)).ToString()));
+			result.Append(MakeItem("Humidity", _statistics(list.Select(z => z.Humidity)).ToString()));
+			result.Append(EndList);
+			return result.ToString();
+		}
+
+		private static string MakeCaption(string caption) => $"## {caption}\n\n";
+		
+		private static string MakeItem(string valueType, string entry) => $" * **{valueType}**: {entry}\n\n";
 	}
 
 	public static class ReportMakerHelper
@@ -84,12 +94,30 @@ namespace Delegates.Reports
 
 		public static string MedianMarkdownReport(IEnumerable<Measurement> data)
 		{
-			return new MedianMarkdownReportMaker().MakeReport(data);
+			return new MarkdownReportMaker("Median", (stats) =>
+			{
+				var list = stats.OrderBy(z => z).ToList();
+				if (list.Count % 2 == 0)
+					return (list[list.Count / 2] + list[list.Count / 2 - 1]) / 2;
+
+				return list[list.Count / 2];
+			}).MakeReport(data);
 		}
 
-		public static string MeanAndStdMarkdownReport(IEnumerable<Measurement> measurements)
+		public static string MeanAndStdMarkdownReport(IEnumerable<Measurement> data)
 		{
-			throw new NotImplementedException();
+			return new MarkdownReportMaker("Mean and Std", (stats) =>
+			{
+				var list = stats.ToList();
+				var mean = list.Average();
+				var std = Math.Sqrt(list.Select(z => Math.Pow(z - mean, 2)).Sum() / (list.Count - 1));
+
+				return new MeanAndStd
+				{
+					Mean = mean,
+					Std = std
+				};
+			}).MakeReport(data);
 		}
 
 		public static string MedianHtmlReport(IEnumerable<Measurement> measurements)
