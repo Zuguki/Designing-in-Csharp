@@ -29,39 +29,21 @@ namespace Delegates.Reports
 
 	public class MeanAndStdHtmlReportMaker : ReportMaker
 	{
-		protected override string Caption
-		{
-			get
-			{
-				return "Mean and Std";
-			}
-		}
+		protected override string Caption => "Mean and Std";
 
-		protected override string MakeCaption(string caption)
-		{
-			return $"<h1>{caption}</h1>";
-		}
+		protected override string MakeCaption(string caption) => $"<h1>{caption}</h1>";
 
-		protected override string BeginList()
-		{
-			return "<ul>";
-		}
+		protected override string BeginList() => "<ul>";
 
-		protected override string EndList()
-		{
-			return "</ul>";
-		}
+		protected override string EndList() => "</ul>";
 
-		protected override string MakeItem(string valueType, string entry)
-		{
-			return $"<li><b>{valueType}</b>: {entry}";
-		}
+		protected override string MakeItem(string valueType, string entry) => $"<li><b>{valueType}</b>: {entry}";
 
-		protected override object MakeStatistics(IEnumerable<double> _data)
+		protected override object MakeStatistics(IEnumerable<double> data)
 		{
-			var data = _data.ToList();
-			var mean = data.Average();
-			var std = Math.Sqrt(data.Select(z => Math.Pow(z - mean, 2)).Sum() / (data.Count - 1));
+			var list = data.ToList();
+			var mean = list.Average();
+			var std = Math.Sqrt(list.Select(z => Math.Pow(z - mean, 2)).Sum() / (list.Count - 1));
 
 			return new MeanAndStd
 			{
@@ -73,33 +55,15 @@ namespace Delegates.Reports
 
 	public class MedianMarkdownReportMaker : ReportMaker
 	{
-		protected override string Caption
-		{
-			get
-			{
-				return "Median";
-			}
-		}
+		protected override string Caption => "Median";
 
-		protected override string BeginList()
-		{
-			return "";
-		}
+		protected override string BeginList() => "";
 
-		protected override string EndList()
-		{
-			return "";
-		}
+		protected override string EndList() => "";
 
-		protected override string MakeCaption(string caption)
-		{
-			return $"## {caption}\n\n";
-		}
+		protected override string MakeCaption(string caption) => $"## {caption}\n\n";
 
-		protected override string MakeItem(string valueType, string entry)
-		{
-			return $" * **{valueType}**: {entry}\n\n";
-		}
+		protected override string MakeItem(string valueType, string entry) => $" * **{valueType}**: {entry}\n\n";
 
 		protected override object MakeStatistics(IEnumerable<double> data)
 		{

@@ -6,7 +6,7 @@ namespace Delegates.Reports
 	[TestFixture]
 	public class ReportMaker_should
 	{
-		private readonly List<Measurement> data = new List<Measurement>
+		private readonly List<Measurement> _data = new List<Measurement>
 		{
 			new Measurement
 			{
@@ -33,7 +33,7 @@ namespace Delegates.Reports
 		public void MeanAndStdHtml()
 		{
 			var expected = @"<h1>Mean and Std</h1><ul><li><b>Temperature</b>: 9±17.0880074906351<li><b>Humidity</b>: 2±0.816496580927726</ul>";
-			var actual = ReportMakerHelper.MeanAndStdHtmlReport(data);
+			var actual = ReportMakerHelper.MeanAndStdHtmlReport(_data);
 			Assert.AreEqual(expected, actual);
 		}
 
@@ -41,7 +41,7 @@ namespace Delegates.Reports
 		public void MedianMarkdown()
 		{
 			var expected = "## Median\n\n * **Temperature**: 8\n\n * **Humidity**: 2\n\n";
-			var actual = ReportMakerHelper.MedianMarkdownReport(data);
+			var actual = ReportMakerHelper.MedianMarkdownReport(_data);
 			Assert.AreEqual(expected, actual);
 		}
 
@@ -49,7 +49,7 @@ namespace Delegates.Reports
 		public void MeanAndStdMarkdown()
 		{
 			var expected = "## Mean and Std\n\n * **Temperature**: 9±17.0880074906351\n\n * **Humidity**: 2±0.816496580927726\n\n";
-			var actual = ReportMakerHelper.MeanAndStdMarkdownReport(data);
+			var actual = ReportMakerHelper.MeanAndStdMarkdownReport(_data);
 			Assert.AreEqual(expected, actual);
 		}
 
@@ -57,7 +57,7 @@ namespace Delegates.Reports
 		public void MedianHtml()
 		{
 			var expected = "<h1>Median</h1><ul><li><b>Temperature</b>: 8<li><b>Humidity</b>: 2</ul>";
-			var actual = ReportMakerHelper.MedianHtmlReport(data);
+			var actual = ReportMakerHelper.MedianHtmlReport(_data);
 			Assert.AreEqual(expected, actual);
 		}
 	}
