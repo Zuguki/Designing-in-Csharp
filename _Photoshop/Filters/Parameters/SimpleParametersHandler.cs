@@ -1,10 +1,19 @@
 using System.Linq;
+using System.Reflection;
 
 namespace MyPhotoshop.Filters.Parameters
 {
     public class SimpleParametersHandler<TParameters> : IParametersHandler<TParameters>
         where TParameters : IParameters, new()
     {
+        private PropertyInfo[] _propertiesField;
+        private PropertyInfo[] Properties => 
+            _propertiesField ?? (_propertiesField = 
+                typeof(TParameters)
+                    .GetProperties()
+                    .Where(item => item.GetCustomAttributes(typeof(ParameterInfo), false).Length > 0)
+                    .ToArray());
+
         public ParameterInfo[] GetDescription()
         {
             return typeof(TParameters)
@@ -19,15 +28,9 @@ namespace MyPhotoshop.Filters.Parameters
         public TParameters CreateParameters(double[] values)
         {
             var parameters = new TParameters();
-            
-            var properties = parameters
-                .GetType()
-                .GetProperties()
-                .Where(item => item.GetCustomAttributes(typeof(ParameterInfo), false).Length > 0)
-                .ToArray();
 
             for (var index = 0; index < values.Length; index++)
-                properties[index].SetValue(parameters, values[index], new object[0]);
+                Properties[index].SetValue(parameters, values[index], new object[0]);
 
             return parameters;
         }
