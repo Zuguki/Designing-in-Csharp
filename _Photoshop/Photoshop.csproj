@@ -45,6 +45,7 @@
     <Compile Include="Filters\Parameters\ParameterInfo.cs" />
     <Compile Include="Filters\Parameters\ParametrizedFilter.cs" />
     <Compile Include="Filters\Parameters\SimpleParametersHandler.cs" />
+    <Compile Include="Filters\Parameters\StaticParametersHandler.cs" />
     <Compile Include="Filters\PixelFilter.cs" />
     <Compile Include="Filters\Transform\FreeTransformer.cs" />
     <Compile Include="Filters\Transform\ITransformer.cs" />

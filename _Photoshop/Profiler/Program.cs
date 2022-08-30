@@ -10,11 +10,14 @@ namespace Profiler
         public static void Main(string[] args)
         {
             var simpleHandler = new SimpleParametersHandler<LighteningParameters>();
+            var staticHandler = new StaticParametersHandler<LighteningParameters>();
+            
             Test(values => simpleHandler.CreateParameters(values), 100_000);
+            Test(values => staticHandler.CreateParameters(values), 100_000);
             Test(values => new LighteningParameters {Ratio = values[0]}, 100_000);
         }
 
-        public static void Test(Func<double[], LighteningParameters> action, int upperBound)
+        private static void Test(Func<double[], LighteningParameters> action, int upperBound)
         {
             var args = new double[] {0};
             action(args);
