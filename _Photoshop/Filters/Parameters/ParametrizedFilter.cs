@@ -1,4 +1,5 @@
 using MyPhotoshop.Data;
+using MyPhotoshop.Filters.Parameters;
 
 namespace MyPhotoshop.Filters
 {
