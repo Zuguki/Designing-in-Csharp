@@ -11,9 +11,11 @@ namespace Profiler
         {
             var simpleHandler = new SimpleParametersHandler<LighteningParameters>();
             var staticHandler = new StaticParametersHandler<LighteningParameters>();
+            var expressionsHandler = new ExpressionsParametersHandler<LighteningParameters>();
             
             Test(values => simpleHandler.CreateParameters(values), 100_000);
             Test(values => staticHandler.CreateParameters(values), 100_000);
+            Test(values => expressionsHandler.CreateParameters(values), 100_000);
             Test(values => new LighteningParameters {Ratio = values[0]}, 100_000);
         }
 
