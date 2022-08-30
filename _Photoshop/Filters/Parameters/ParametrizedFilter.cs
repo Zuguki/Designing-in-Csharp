@@ -6,16 +6,16 @@ namespace MyPhotoshop.Filters
     public abstract class ParametrizedFilter<TParameters> : IFilter
         where TParameters : IParameters, new()
     {
-        private TParameters _parameters = new TParameters();
+        private readonly IParametersHandler<TParameters> _handler = new SimpleParametersHandler<TParameters>();
 
-        public ParameterInfo[] GetParameters() => _parameters.GetDescriptions();
+        public ParameterInfo[] GetParameters() => _handler.GetDescription();
 
         public Photo Process(Photo original, double[] values)
         {
-            _parameters.SetValues(values);
-            return Process(original, _parameters);
+            var parameters = _handler.CreateParameters(values);
+            return Process(original, parameters);
         }
 
-        public abstract Photo Process(Photo original, TParameters parameters);
+        protected abstract Photo Process(Photo original, TParameters parameters);
     }
 }

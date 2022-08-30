@@ -18,7 +18,7 @@ namespace MyPhotoshop.Filters
 
         public override string ToString() => _name;
 
-        public override Photo Process(Photo original, TParameters parameters)
+        protected override Photo Process(Photo original, TParameters parameters)
         {
             var oldSize = new Size(original.Width, original.Height);
             _transformer.Prepare(oldSize, parameters);

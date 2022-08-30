@@ -2,12 +2,12 @@ using System.Linq;
 
 namespace MyPhotoshop.Filters.Parameters
 {
-    public static class ParametersExtention
+    public class SimpleParametersHandler<TParameters> : IParametersHandler<TParameters>
+        where TParameters : IParameters, new()
     {
-        public static ParameterInfo[] GetDescriptions(this IParameters parameters)
+        public ParameterInfo[] GetDescription()
         {
-            return parameters
-                .GetType()
+            return typeof(TParameters)
                 .GetProperties()
                 .Select(item => item.GetCustomAttributes(typeof(ParameterInfo), false))
                 .Where(item => item.Length > 0)
@@ -16,8 +16,10 @@ namespace MyPhotoshop.Filters.Parameters
                 .ToArray();
         }
 
-        public static void SetValues(this IParameters parameters, double[] values)
+        public TParameters CreateParameters(double[] values)
         {
+            var parameters = new TParameters();
+            
             var properties = parameters
                 .GetType()
                 .GetProperties()
@@ -26,6 +28,8 @@ namespace MyPhotoshop.Filters.Parameters
 
             for (var index = 0; index < values.Length; index++)
                 properties[index].SetValue(parameters, values[index], new object[0]);
+
+            return parameters;
         }
     }
 }

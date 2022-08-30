@@ -15,7 +15,7 @@ namespace MyPhotoshop.Filters
             _processor = processor;
         }
 
-        public override Photo Process(Photo original, TParameters parameters)
+        protected override Photo Process(Photo original, TParameters parameters)
         {
             var result = new Photo(original.Width, original.Height);
 
