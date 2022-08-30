@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Photoshop", "Photoshop.csproj", "{1E278156-A549-4E5D-B524-FBF3C53E7021}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Profiler", "Profiler\Profiler.csproj", "{4CADE525-AF0C-4170-B9A3-E890B7EA6247}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -13,6 +15,10 @@ Global
 		{1E278156-A549-4E5D-B524-FBF3C53E7021}.Debug|x86.Build.0 = Debug|x86
 		{1E278156-A549-4E5D-B524-FBF3C53E7021}.Release|x86.ActiveCfg = Release|x86
 		{1E278156-A549-4E5D-B524-FBF3C53E7021}.Release|x86.Build.0 = Release|x86
+		{4CADE525-AF0C-4170-B9A3-E890B7EA6247}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4CADE525-AF0C-4170-B9A3-E890B7EA6247}.Debug|x86.Build.0 = Debug|Any CPU
+		{4CADE525-AF0C-4170-B9A3-E890B7EA6247}.Release|x86.ActiveCfg = Release|Any CPU
+		{4CADE525-AF0C-4170-B9A3-E890B7EA6247}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
