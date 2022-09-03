@@ -27,12 +27,7 @@ namespace SRP.ControlDigit
     {
         public static int Upc(long number)
         {
-            var sum = 0;
-            var factor = 3;
-            
-            for (; number > 0; factor = 4 - factor, number /= 10)
-                sum += (int) (number % 10) * factor;
-
+            var sum = GetSumOf(number, 3, value => 4 - value);
             return GetFinalDigitBySum(sum);
         }
 
@@ -60,6 +55,15 @@ namespace SRP.ControlDigit
                 sum += ((int) (number % 10) * multiplyValue).SplitTheNumberByPositions().Sum();
 
             return (10 - sum % division) % division;
+        }
+
+        private static int GetSumOf(long number, int startValue, Func<int, int> step)
+        {
+            var sum = 0;
+            for (var index = startValue; number > 0; number /= 10, index = step(index))
+                sum += (int) (number % 10) * index;
+
+            return sum;
         }
 
         private static int GetFinalDigitBySum(int sum)
