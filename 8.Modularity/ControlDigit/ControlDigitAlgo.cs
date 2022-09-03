@@ -33,11 +33,8 @@ namespace SRP.ControlDigit
 
         public static int Isbn10(long number)
         {
-            var sum = 0;
+            var sum = GetSumOf(number, 2, num => num + 1);
             const int division = 11;
-            
-            for (var index = 2; number > 0; index++, number /= 10)
-                sum += (int) (number % 10) * index;
 
             if (division - sum % division == 10)
                 return 'X';
