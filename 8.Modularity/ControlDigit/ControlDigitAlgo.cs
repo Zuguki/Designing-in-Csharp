@@ -56,10 +56,8 @@ namespace SRP.ControlDigit
             var sum = 0;
             for (var index = startValue; number > 0; number /= 10, index = step(index))
             {
-                if (addedFunc is null)
-                    sum += (int) (number % 10) * index;
-                else
-                    sum += addedFunc((int) (number % 10) * index).Sum();
+                var num = (int) (number % 10 * index);
+                sum += addedFunc is null ? num : addedFunc(num).Sum();
             }
 
             return sum;
