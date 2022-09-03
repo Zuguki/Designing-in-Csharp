@@ -29,14 +29,9 @@ namespace SRP.ControlDigit
         {
             var sum = 0;
             var factor = 3;
-            do
-            {
-                var digit = (int)(number % 10);
-                sum += factor * digit;
-                factor = 4 - factor;
-                number /= 10;
-            }
-            while (number > 0);
+            
+            for (; number > 0; factor = 4 - factor, number /= 10)
+                sum += (int) (number % 10) * factor;
 
             return GetFinalDigitBySum(sum);
         }
