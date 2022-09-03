@@ -51,7 +51,7 @@ namespace SRP.ControlDigit
             const int division = 10;
             var checker = 1;
             
-            for (var multiplyValue = 2; number > 0; multiplyValue += checker, number /= 10, checker = -checker)
+            for (var multiplyValue = 2; number > 0; checker = -checker, multiplyValue += checker, number /= 10)
                 sum += ((int) (number % 10) * multiplyValue).SplitTheNumberByPositions().Sum();
 
             return (10 - sum % division) % division;
