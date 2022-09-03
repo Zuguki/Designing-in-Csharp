@@ -10,6 +10,8 @@ namespace SRP.ControlDigit
 	{
 		static void Main(string[] args)
 		{
+			var a = ControlDigitAlgo.Isbn10(6);
+			Console.WriteLine(a);
 		}
 	}
 }
