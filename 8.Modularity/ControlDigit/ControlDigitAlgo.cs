@@ -44,21 +44,23 @@ namespace SRP.ControlDigit
 
         public static int Luhn(long number)
         {
-            var sum = 0;
+            var sum = GetSumOf(number, 2, num => num == 2 ? 1 : 2, num => num.SplitTheNumberByPositions());
             const int division = 10;
-            var checker = 1;
-            
-            for (var multiplyValue = 2; number > 0; checker = -checker, multiplyValue += checker, number /= 10)
-                sum += ((int) (number % 10) * multiplyValue).SplitTheNumberByPositions().Sum();
 
             return (10 - sum % division) % division;
         }
 
-        private static int GetSumOf(long number, int startValue, Func<int, int> step)
+        private static int GetSumOf(long number, int startValue, Func<int, int> step,
+            Func<int, IEnumerable<int>> addedFunc = null)
         {
             var sum = 0;
             for (var index = startValue; number > 0; number /= 10, index = step(index))
-                sum += (int) (number % 10) * index;
+            {
+                if (addedFunc is null)
+                    sum += (int) (number % 10) * index;
+                else
+                    sum += addedFunc((int) (number % 10) * index).Sum();
+            }
 
             return sum;
         }
