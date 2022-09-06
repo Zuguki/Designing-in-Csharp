@@ -16,7 +16,9 @@ namespace FractalPainting.App
         public static MainForm CreateMainForm()
         {
             // Example: ConfigureContainer()...
-            return new MainForm();
+            var cont = ConfigureContainer();
+            return cont.Get<MainForm>();
+            // return new MainForm();
         }
 
         public static StandardKernel ConfigureContainer()
@@ -25,6 +27,11 @@ namespace FractalPainting.App
 
             // Example
             // container.Bind<TService>().To<TImplementation>();
+            container.Bind<IUiAction>().To<SaveImageAction>();
+            container.Bind<IUiAction>().To<DragonFractalAction>();
+            container.Bind<IUiAction>().To<KochFractalAction>();
+            container.Bind<IUiAction>().To<ImageSettingsAction>();
+            container.Bind<IUiAction>().To<PaletteSettingsAction>();
 
             return container;
         }
@@ -32,21 +39,21 @@ namespace FractalPainting.App
 
     public static class Services
     {
-        private static readonly SettingsManager settingsManager;
-        private static readonly PictureBoxImageHolder pictureBoxImageHolder;
-        private static readonly Palette palette;
-        private static readonly AppSettings appSettings;
-        private static readonly IImageSettingsProvider imageSettingsProvider;
-        private static readonly IImageDirectoryProvider imageDirectoryProvider;
+        private static readonly SettingsManager SettingsManager;
+        private static readonly PictureBoxImageHolder PictureBoxImageHolder;
+        private static readonly Palette Palette;
+        private static readonly AppSettings AppSettings;
+        private static readonly IImageSettingsProvider ImageSettingsProvider;
+        private static readonly IImageDirectoryProvider ImageDirectoryProvider;
 
         static Services()
         {
-            palette = new Palette();
-            pictureBoxImageHolder = new PictureBoxImageHolder();
-            settingsManager = new SettingsManager(new XmlObjectSerializer(), new FileBlobStorage());
-            appSettings = settingsManager.Load();
-            imageSettingsProvider = appSettings;
-            imageDirectoryProvider = appSettings;
+            Palette = new Palette();
+            PictureBoxImageHolder = new PictureBoxImageHolder();
+            SettingsManager = new SettingsManager(new XmlObjectSerializer(), new FileBlobStorage());
+            AppSettings = SettingsManager.Load();
+            ImageSettingsProvider = AppSettings;
+            ImageDirectoryProvider = AppSettings;
         }
 
         public static IObjectSerializer CreateObjectSerializer()
@@ -61,37 +68,37 @@ namespace FractalPainting.App
 
         public static SettingsManager GetSettingsManager()
         {
-            return settingsManager;
+            return SettingsManager;
         }
 
         public static PictureBoxImageHolder GetPictureBoxImageHolder()
         {
-            return pictureBoxImageHolder;
+            return PictureBoxImageHolder;
         }
 
         public static IImageHolder GetImageHolder()
         {
-            return pictureBoxImageHolder;
+            return PictureBoxImageHolder;
         }
 
         public static Palette GetPalette()
         {
-            return palette;
+            return Palette;
         }
 
         public static ImageSettings GetImageSettings()
         {
-            return appSettings.ImageSettings;
+            return AppSettings.ImageSettings;
         }
 
         public static IImageSettingsProvider GetImageSettingsProvider()
         {
-            return imageSettingsProvider;
+            return ImageSettingsProvider;
         }
 
         public static AppSettings GetAppSettings()
         {
-            return appSettings;
+            return AppSettings;
         }
     }
 
@@ -169,6 +176,7 @@ namespace FractalPainting.App
                     if (i % 100 == 0) imageHolder.UpdateUi();
                 }
             }
+            
             imageHolder.UpdateUi();
         }
     }

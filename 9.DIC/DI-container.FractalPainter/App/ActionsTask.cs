@@ -9,20 +9,40 @@ namespace FractalPainting.App
 {
     public class ImageSettingsAction : IUiAction
     {
+        private readonly IImageHolder _holder;
+        private readonly ImageSettings _imageSettings;
+
+        public ImageSettingsAction(IImageHolder holder, ImageSettings imageSettings)
+        {
+            _holder = holder;
+            _imageSettings = imageSettings;
+        }
+        
         public MenuCategory Category => MenuCategory.Settings;
         public string Name => "Изображение...";
         public string Description => "Размеры изображения";
 
         public void Perform()
         {
-            var imageSettings = Services.GetImageSettings();
-            SettingsForm.For(imageSettings).ShowDialog();
-            Services.GetImageHolder().RecreateImage(imageSettings);
+            SettingsForm.For(_imageSettings).ShowDialog();
+            _holder.RecreateImage(_imageSettings);
+            // var imageSettings = Services.GetImageSettings();
+            // SettingsForm.For(imageSettings).ShowDialog();
+            // Services.GetImageHolder().RecreateImage(imageSettings);
         }
     }
 
     public class SaveImageAction : IUiAction
     {
+        private readonly AppSettings _appSettings;
+        private readonly IImageHolder _holder;
+
+        public SaveImageAction(AppSettings appSettings, IImageHolder holder)
+        {
+            _appSettings = appSettings;
+            _holder = holder;
+        }
+
         public MenuCategory Category => MenuCategory.File;
         public string Name => "Сохранить...";
         public string Description => "Сохранить изображение в файл";
@@ -32,28 +52,37 @@ namespace FractalPainting.App
             var dialog = new SaveFileDialog
             {
                 CheckFileExists = false,
-                InitialDirectory = Path.GetFullPath(Services.GetAppSettings().ImagesDirectory),
+                InitialDirectory = Path.GetFullPath(_appSettings.ImagesDirectory),
                 DefaultExt = "bmp",
                 FileName = "image.bmp",
                 Filter = "Изображения (*.bmp)|*.bmp"
             };
             var res = dialog.ShowDialog();
             if (res == DialogResult.OK)
-                Services.GetImageHolder().SaveImage(dialog.FileName);
+                _holder.SaveImage(dialog.FileName);
+            // Services.GetImageHolder().SaveImage(dialog.FileName);
         }
     }
 
     public class PaletteSettingsAction : IUiAction
     {
+        private readonly Palette _palette;
+        public PaletteSettingsAction(Palette palette)
+        {
+            _palette = palette;
+        }
+
         public MenuCategory Category => MenuCategory.Settings;
         public string Name => "Палитра...";
         public string Description => "Цвета для рисования фракталов";
 
         public void Perform()
         {
-            SettingsForm.For(Services.GetPalette()).ShowDialog();
+            SettingsForm.For(_palette).ShowDialog();
+            // SettingsForm.For(Services.GetPalette()).ShowDialog();
         }
     }
+
 
     public class MainForm : Form
     {
@@ -61,11 +90,11 @@ namespace FractalPainting.App
             : this(
                 new IUiAction[]
                 {
-                    new SaveImageAction(),
+                    new SaveImageAction(Services.GetAppSettings(), Services.GetImageHolder()),
                     new DragonFractalAction(),
                     new KochFractalAction(),
-                    new ImageSettingsAction(),
-                    new PaletteSettingsAction()
+                    new ImageSettingsAction(Services.GetImageHolder(), Services.GetImageSettings()),
+                    new PaletteSettingsAction(Services.GetPalette())
                 }, Services.GetPictureBoxImageHolder())
         { }
 
