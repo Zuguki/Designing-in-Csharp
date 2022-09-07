@@ -1,12 +1,10 @@
 using System;
-using System.Windows.Forms;
 using System.Drawing;
 using System.Linq;
 using FractalPainting.App.Fractals;
 using FractalPainting.Infrastructure.Common;
 using FractalPainting.Infrastructure.UiActions;
 using Ninject;
-using Ninject.Extensions.Factory;
 using Ninject.Extensions.Conventions;
 
 namespace FractalPainting.App
@@ -16,22 +14,29 @@ namespace FractalPainting.App
         public static MainForm CreateMainForm()
         {
             // Example: ConfigureContainer()...
-            var cont = ConfigureContainer();
-            return cont.Get<MainForm>();
             // return new MainForm();
+            return ConfigureContainer().Get<MainForm>();
         }
 
         public static StandardKernel ConfigureContainer()
         {
-            var container = new StandardKernel();
-
             // Example
             // container.Bind<TService>().To<TImplementation>();
+            
+            var container = new StandardKernel();
+            container.Bind<PictureBoxImageHolder>().ToConstant(Services.GetPictureBoxImageHolder());
+            // container.Bind(s => s.FromThisAssembly().SelectAllClasses().BindAllInterfaces());
+            
             container.Bind<IUiAction>().To<SaveImageAction>();
             container.Bind<IUiAction>().To<DragonFractalAction>();
             container.Bind<IUiAction>().To<KochFractalAction>();
             container.Bind<IUiAction>().To<ImageSettingsAction>();
             container.Bind<IUiAction>().To<PaletteSettingsAction>();
+            
+            container.Bind<AppSettings>().ToConstant(Services.GetAppSettings());
+            container.Bind<IImageHolder>().ToConstant(Services.GetImageHolder());
+            container.Bind<ImageSettings>().ToConstant(Services.GetImageSettings());
+            container.Bind<Palette>().ToConstant(Services.GetPalette());
 
             return container;
         }
