@@ -34,10 +34,10 @@ namespace FractalPainting.App
 
     public class SaveImageAction : IUiAction
     {
-        private readonly IImageDirectoryProvider _appSettings;
+        private readonly AppSettings _appSettings;
         private readonly IImageHolder _holder;
 
-        public SaveImageAction(IImageDirectoryProvider appSettings, IImageHolder holder)
+        public SaveImageAction(AppSettings appSettings, IImageHolder holder)
         {
             _appSettings = appSettings;
             _holder = holder;

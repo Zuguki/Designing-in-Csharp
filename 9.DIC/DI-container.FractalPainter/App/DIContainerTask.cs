@@ -1,12 +1,11 @@
 using System;
 using System.Drawing;
 using System.Linq;
-using System.Windows.Forms;
 using FractalPainting.App.Fractals;
 using FractalPainting.Infrastructure.Common;
 using FractalPainting.Infrastructure.UiActions;
 using Ninject;
-using Ninject.Extensions.Conventions;
+using Ninject.Extensions.Factory;
 
 namespace FractalPainting.App
 {
@@ -21,12 +20,7 @@ namespace FractalPainting.App
 
         public static StandardKernel ConfigureContainer()
         {
-            // Example
-            // container.Bind<TService>().To<TImplementation>();
-            
             var container = new StandardKernel();
-            container.Bind<PictureBoxImageHolder>().ToConstant(Services.GetPictureBoxImageHolder());
-            // container.Bind(s => s.FromThisAssembly().SelectAllClasses().BindAllInterfaces());
             
             container.Bind<IUiAction>().To<SaveImageAction>();
             container.Bind<IUiAction>().To<DragonFractalAction>();
@@ -34,91 +28,34 @@ namespace FractalPainting.App
             container.Bind<IUiAction>().To<ImageSettingsAction>();
             container.Bind<IUiAction>().To<PaletteSettingsAction>();
 
-            // container.Bind<IImageDirectoryProvider>().ToConstant(Services.GetAppSettings());
-            container.Bind<IImageHolder>().ToConstant(Services.GetImageHolder()).InSingletonScope();
-            // container.Bind<ImageSettings>().ToConstant(Services.GetImageSettings());
-            // container.Bind<Palette>().ToConstant(Services.GetPalette());
+            container.Bind<IObjectSerializer>().To<XmlObjectSerializer>();
+            container.Bind<IBlobStorage>().To<FileBlobStorage>();
 
-            container.Bind<IImageDirectoryProvider>().To<AppSettings>();
-            // container.Bind<IImageHolder>().To<PictureBoxImageHolder>().InSingletonScope();
-            container.Bind<ImageSettings>().To<ImageSettings>();
+            container.Bind<AppSettings>().ToMethod(context => context.Kernel.Get<SettingsManager>().Load())
+                .InSingletonScope();
+            container.Bind<IDragonPainterFactory>().ToFactory();
+            container.Bind<ImageSettings>().ToMethod(context => context.Kernel.Get<AppSettings>().ImageSettings)
+                .InSingletonScope();
             container.Bind<Palette>().To<Palette>().InSingletonScope();
+            container.Bind<IImageHolder, PictureBoxImageHolder>().To<PictureBoxImageHolder>().InSingletonScope();
 
             return container;
         }
     }
 
-    public static class Services
+    public interface IDragonPainterFactory
     {
-        private static readonly SettingsManager SettingsManager;
-        private static readonly PictureBoxImageHolder PictureBoxImageHolder;
-        private static readonly Palette Palette;
-        private static readonly AppSettings AppSettings;
-        private static readonly IImageSettingsProvider ImageSettingsProvider;
-        private static readonly IImageDirectoryProvider ImageDirectoryProvider;
-
-        static Services()
-        {
-            Palette = new Palette();
-            PictureBoxImageHolder = new PictureBoxImageHolder();
-            SettingsManager = new SettingsManager(new XmlObjectSerializer(), new FileBlobStorage());
-            AppSettings = SettingsManager.Load();
-            ImageSettingsProvider = AppSettings;
-            ImageDirectoryProvider = AppSettings;
-        }
-
-        public static IObjectSerializer CreateObjectSerializer()
-        {
-            return new XmlObjectSerializer();
-        }
-
-        public static IBlobStorage CreateIBlobStorage()
-        {
-            return new FileBlobStorage();
-        }
-
-        public static SettingsManager GetSettingsManager()
-        {
-            return SettingsManager;
-        }
-
-        public static PictureBoxImageHolder GetPictureBoxImageHolder()
-        {
-            return PictureBoxImageHolder;
-        }
-
-        public static IImageHolder GetImageHolder()
-        {
-            return PictureBoxImageHolder;
-        }
-
-        public static Palette GetPalette()
-        {
-            return Palette;
-        }
-
-        public static ImageSettings GetImageSettings()
-        {
-            return AppSettings.ImageSettings;
-        }
-
-        public static IImageSettingsProvider GetImageSettingsProvider()
-        {
-            return ImageSettingsProvider;
-        }
-
-        public static AppSettings GetAppSettings()
-        {
-            return AppSettings;
-        }
+        DragonPainter CreatePainter(IImageHolder imageHolder, DragonSettings settings);
     }
 
     public class DragonFractalAction : IUiAction
     {
         private readonly IImageHolder _holder;
+        private readonly IDragonPainterFactory _dragonPainterFactory;
 
-        public DragonFractalAction(IImageHolder holder)
+        public DragonFractalAction(IDragonPainterFactory dragonPainterFactory, IImageHolder holder)
         {
+            _dragonPainterFactory = dragonPainterFactory;
             _holder = holder;
         }
 
@@ -133,7 +70,7 @@ namespace FractalPainting.App
             SettingsForm.For(dragonSettings).ShowDialog();
             // создаём painter с такими настройками
             // var painter = new DragonPainter(Services.GetImageHolder(), dragonSettings);
-            var painter = new DragonPainter(_holder, dragonSettings);
+            var painter = _dragonPainterFactory.CreatePainter(_holder, dragonSettings);
             painter.Paint();
         }
 
@@ -168,45 +105,47 @@ namespace FractalPainting.App
 
     public class DragonPainter
     {
-        private readonly IImageHolder imageHolder;
-        private readonly DragonSettings settings;
-        private readonly float size;
-        private Size imageSize;
+        private readonly IImageHolder _imageHolder;
+        private readonly DragonSettings _settings;
+        private readonly float _size;
+        private Size _imageSize;
+        private readonly Palette _palette;
 
-        public DragonPainter(IImageHolder imageHolder, DragonSettings settings)
+        public DragonPainter(IImageHolder imageHolder, DragonSettings settings, Palette palette)
         {
-            this.imageHolder = imageHolder;
-            this.settings = settings;
-            imageSize = imageHolder.GetImageSize();
-            size = Math.Min(imageSize.Width, imageSize.Height) / 2.1f;
+            _imageHolder = imageHolder;
+            _settings = settings;
+            _palette = palette;
+            _imageSize = imageHolder.GetImageSize();
+            _size = Math.Min(_imageSize.Width, _imageSize.Height) / 2.1f;
         }
 
         public void Paint()
         {
-            using (var graphics = imageHolder.StartDrawing())
+            using (var graphics = _imageHolder.StartDrawing())
             {
-                graphics.FillRectangle(Brushes.Black, 0, 0, imageSize.Width, imageSize.Height);
+                graphics.FillRectangle(new SolidBrush(_palette.BackgroundColor), 0, 0, _imageSize.Width, _imageSize.Height);
                 var r = new Random();
-                var cosa = (float)Math.Cos(settings.Angle1);
-                var sina = (float)Math.Sin(settings.Angle1);
-                var cosb = (float)Math.Cos(settings.Angle2);
-                var sinb = (float)Math.Sin(settings.Angle2);
-                var shiftX = settings.ShiftX * size * 0.8f;
-                var shiftY = settings.ShiftY * size * 0.8f;
-                var scale = settings.Scale;
+                var cosa = (float)Math.Cos(_settings.Angle1);
+                var sina = (float)Math.Sin(_settings.Angle1);
+                var cosb = (float)Math.Cos(_settings.Angle2);
+                var sinb = (float)Math.Sin(_settings.Angle2);
+                var shiftX = _settings.ShiftX * _size * 0.8f;
+                var shiftY = _settings.ShiftY * _size * 0.8f;
+                var scale = _settings.Scale;
                 var p = new PointF(0, 0);
-                foreach (var i in Enumerable.Range(0, settings.IterationsCount))
+                foreach (var i in Enumerable.Range(0, _settings.IterationsCount))
                 {
-                    graphics.FillRectangle(Brushes.Yellow, imageSize.Width / 3f + p.X, imageSize.Height / 2f + p.Y, 1, 1);
+                    graphics.FillRectangle(new SolidBrush(_palette.PrimaryColor), _imageSize.Width / 3f + p.X, _imageSize.Height / 2f + p.Y, 1, 1);
                     if (r.Next(0, 2) == 0)
                         p = new PointF(scale * (p.X * cosa - p.Y * sina), scale * (p.X * sina + p.Y * cosa));
                     else
                         p = new PointF(scale * (p.X * cosb - p.Y * sinb) + shiftX, scale * (p.X * sinb + p.Y * cosb) + shiftY);
-                    if (i % 100 == 0) imageHolder.UpdateUi();
+                    if (i % 100 == 0) _imageHolder.UpdateUi();
                 }
             }
             
-            imageHolder.UpdateUi();
+            _imageHolder.UpdateUi();
         }
     }
 }
