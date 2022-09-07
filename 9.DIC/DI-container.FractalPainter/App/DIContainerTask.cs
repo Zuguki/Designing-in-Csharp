@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.Linq;
+using System.Windows.Forms;
 using FractalPainting.App.Fractals;
 using FractalPainting.Infrastructure.Common;
 using FractalPainting.Infrastructure.UiActions;
@@ -32,11 +33,16 @@ namespace FractalPainting.App
             container.Bind<IUiAction>().To<KochFractalAction>();
             container.Bind<IUiAction>().To<ImageSettingsAction>();
             container.Bind<IUiAction>().To<PaletteSettingsAction>();
-            
-            container.Bind<AppSettings>().ToConstant(Services.GetAppSettings());
-            container.Bind<IImageHolder>().ToConstant(Services.GetImageHolder());
-            container.Bind<ImageSettings>().ToConstant(Services.GetImageSettings());
-            container.Bind<Palette>().ToConstant(Services.GetPalette());
+
+            // container.Bind<IImageDirectoryProvider>().ToConstant(Services.GetAppSettings());
+            container.Bind<IImageHolder>().ToConstant(Services.GetImageHolder()).InSingletonScope();
+            // container.Bind<ImageSettings>().ToConstant(Services.GetImageSettings());
+            // container.Bind<Palette>().ToConstant(Services.GetPalette());
+
+            container.Bind<IImageDirectoryProvider>().To<AppSettings>();
+            // container.Bind<IImageHolder>().To<PictureBoxImageHolder>().InSingletonScope();
+            container.Bind<ImageSettings>().To<ImageSettings>();
+            container.Bind<Palette>().To<Palette>().InSingletonScope();
 
             return container;
         }
@@ -109,6 +115,13 @@ namespace FractalPainting.App
 
     public class DragonFractalAction : IUiAction
     {
+        private readonly IImageHolder _holder;
+
+        public DragonFractalAction(IImageHolder holder)
+        {
+            _holder = holder;
+        }
+
         public MenuCategory Category => MenuCategory.Fractals;
         public string Name => "Дракон";
         public string Description => "Дракон Хартера-Хейтуэя";
@@ -119,7 +132,8 @@ namespace FractalPainting.App
             // редактируем настройки:
             SettingsForm.For(dragonSettings).ShowDialog();
             // создаём painter с такими настройками
-            var painter = new DragonPainter(Services.GetImageHolder(), dragonSettings);
+            // var painter = new DragonPainter(Services.GetImageHolder(), dragonSettings);
+            var painter = new DragonPainter(_holder, dragonSettings);
             painter.Paint();
         }
 
@@ -131,13 +145,23 @@ namespace FractalPainting.App
 
     public class KochFractalAction : IUiAction
     {
+        private readonly Lazy<IImageHolder> _holder;
+        private readonly Palette _palette;
+
+        public KochFractalAction(Lazy<IImageHolder> holder, Palette palette)
+        {
+            _holder = holder;
+            _palette = palette;
+        }
+
         public MenuCategory Category => MenuCategory.Fractals;
         public string Name => "Кривая Коха";
         public string Description => "Кривая Коха";
 
         public void Perform()
         {
-            var painter = new KochPainter(Services.GetImageHolder(), Services.GetPalette());
+            // var painter = new KochPainter(Services.GetImageHolder(), Services.GetPalette());
+            var painter = new KochPainter(_holder.Value, _palette);
             painter.Paint();
         }
     }
