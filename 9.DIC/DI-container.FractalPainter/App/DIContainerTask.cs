@@ -45,18 +45,17 @@ namespace FractalPainting.App
 
     public interface IDragonPainterFactory
     {
-        DragonPainter CreatePainter(IImageHolder imageHolder, DragonSettings settings);
+        // DragonPainter CreatePainter(IImageHolder imageHolder, DragonSettings settings);
+        DragonPainter CreatePainter();
     }
 
     public class DragonFractalAction : IUiAction
     {
-        private readonly IImageHolder _holder;
         private readonly IDragonPainterFactory _dragonPainterFactory;
 
-        public DragonFractalAction(IDragonPainterFactory dragonPainterFactory, IImageHolder holder)
+        public DragonFractalAction(IDragonPainterFactory dragonPainterFactory)
         {
             _dragonPainterFactory = dragonPainterFactory;
-            _holder = holder;
         }
 
         public MenuCategory Category => MenuCategory.Fractals;
@@ -70,7 +69,7 @@ namespace FractalPainting.App
             SettingsForm.For(dragonSettings).ShowDialog();
             // создаём painter с такими настройками
             // var painter = new DragonPainter(Services.GetImageHolder(), dragonSettings);
-            var painter = _dragonPainterFactory.CreatePainter(_holder, dragonSettings);
+            var painter = _dragonPainterFactory.CreatePainter();
             painter.Paint();
         }
 
@@ -82,14 +81,20 @@ namespace FractalPainting.App
 
     public class KochFractalAction : IUiAction
     {
-        private readonly Lazy<IImageHolder> _holder;
-        private readonly Palette _palette;
+        // private readonly Lazy<IImageHolder> _holder;
+        // private readonly Palette _palette;
+        private readonly Lazy<KochPainter> _painter;
 
-        public KochFractalAction(Lazy<IImageHolder> holder, Palette palette)
+        public KochFractalAction(Lazy<KochPainter> painter)
         {
-            _holder = holder;
-            _palette = palette;
+            _painter = painter;
         }
+
+        // public KochFractalAction(Lazy<IImageHolder> holder, Palette palette)
+        // {
+        //     _holder = holder;
+        //     _palette = palette;
+        // }
 
         public MenuCategory Category => MenuCategory.Fractals;
         public string Name => "Кривая Коха";
@@ -98,17 +103,16 @@ namespace FractalPainting.App
         public void Perform()
         {
             // var painter = new KochPainter(Services.GetImageHolder(), Services.GetPalette());
-            var painter = new KochPainter(_holder.Value, _palette);
-            painter.Paint();
+            _painter.Value.Paint();
+            // var painter = new KochPainter(_holder.Value, _palette);
+            // painter.Paint();
         }
     }
 
-    public class DragonPainter
+    public class DragonPainter 
     {
         private readonly IImageHolder _imageHolder;
         private readonly DragonSettings _settings;
-        private readonly float _size;
-        private Size _imageSize;
         private readonly Palette _palette;
 
         public DragonPainter(IImageHolder imageHolder, DragonSettings settings, Palette palette)
@@ -116,27 +120,27 @@ namespace FractalPainting.App
             _imageHolder = imageHolder;
             _settings = settings;
             _palette = palette;
-            _imageSize = imageHolder.GetImageSize();
-            _size = Math.Min(_imageSize.Width, _imageSize.Height) / 2.1f;
         }
 
         public void Paint()
         {
+            var imageSize = _imageHolder.GetImageSize();
+            var size = Math.Min(imageSize.Width, imageSize.Height) / 2.1f;
             using (var graphics = _imageHolder.StartDrawing())
             {
-                graphics.FillRectangle(new SolidBrush(_palette.BackgroundColor), 0, 0, _imageSize.Width, _imageSize.Height);
+                graphics.FillRectangle(new SolidBrush(_palette.BackgroundColor), 0, 0, imageSize.Width, imageSize.Height);
                 var r = new Random();
                 var cosa = (float)Math.Cos(_settings.Angle1);
                 var sina = (float)Math.Sin(_settings.Angle1);
                 var cosb = (float)Math.Cos(_settings.Angle2);
                 var sinb = (float)Math.Sin(_settings.Angle2);
-                var shiftX = _settings.ShiftX * _size * 0.8f;
-                var shiftY = _settings.ShiftY * _size * 0.8f;
+                var shiftX = _settings.ShiftX * size * 0.8f;
+                var shiftY = _settings.ShiftY * size * 0.8f;
                 var scale = _settings.Scale;
                 var p = new PointF(0, 0);
                 foreach (var i in Enumerable.Range(0, _settings.IterationsCount))
                 {
-                    graphics.FillRectangle(new SolidBrush(_palette.PrimaryColor), _imageSize.Width / 3f + p.X, _imageSize.Height / 2f + p.Y, 1, 1);
+                    graphics.FillRectangle(new SolidBrush(_palette.PrimaryColor), imageSize.Width / 3f + p.X, imageSize.Height / 2f + p.Y, 1, 1);
                     if (r.Next(0, 2) == 0)
                         p = new PointF(scale * (p.X * cosa - p.Y * sina), scale * (p.X * sina + p.Y * cosa));
                     else
