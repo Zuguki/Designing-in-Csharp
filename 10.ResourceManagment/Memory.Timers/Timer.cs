@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace Memory.Timers
 {
     public class Timer : IDisposable
     {
         private bool _disposed;
-        private long _rest;
         private readonly string _name;
         private readonly StringWriter _writer;
         private readonly Stopwatch _stopwatch;
@@ -28,7 +28,7 @@ namespace Memory.Timers
 
         public ChildTimer StartChildTimer(string childName)
         {
-            var child = new ChildTimer(childName);
+            var child = ChildTimer.StartChildTimerStatic(childName);
             _queue.Enqueue(child);
             return child;
         } 
@@ -55,26 +55,18 @@ namespace Memory.Timers
                 _writer.Write(FormatReportLine(_name, 0, _stopwatch.ElapsedMilliseconds));
                 foreach (var item in _queue)
                 {
-                    _writer.Write(FormatReportLine(item.Name, item.Lvl, item.Stopwatch.ElapsedMilliseconds));
-                    _rest += item.Stopwatch.ElapsedMilliseconds;
-                    if (item.Childs.Count == 0)
-                        continue;
-
-                    foreach (var child in item.Childs)
-                    { 
-                        _writer.Write(FormatReportLine(child.Name, child.Lvl, child.Stopwatch.ElapsedMilliseconds));
-                    }
-                    _writer.Write(FormatReportLine("Rest", item.Lvl + 1, item.RestTime));
+                    _writer.Write(item.Sb.ToString());
                 }
-                
+
                 if (_queue.Count > 0)
-                    _writer.Write(FormatReportLine("Rest", 1, _stopwatch.ElapsedMilliseconds - _rest));
+                    _writer.Write(FormatReportLine("Rest", 1,
+                        _stopwatch.ElapsedMilliseconds - _queue.Sum(child => child.Stopwatch.ElapsedMilliseconds)));
             }
             
             _disposed = true;
         }
 
-        private static string FormatReportLine(string timerName, int level, long value)
+        public static string FormatReportLine(string timerName, int level, long value)
         {
             var intro = new string(' ', level * 4) + timerName;
             return $"{intro,-20}: {value}\n";
@@ -83,16 +75,17 @@ namespace Memory.Timers
 
     public class ChildTimer : IDisposable
     {
-        public string Name { get; }
+        public readonly StringBuilder Sb = new StringBuilder();
         public Stopwatch Stopwatch { get; }
-        public Queue<ChildTimer> Childs { get; }
-        public long RestTime { get; private set; }
-        public int Lvl { get; }
+        private Queue<ChildTimer> Queue { get; }
+        private string Name { get; }
+        private long RestTime { get; set; }
+        private int Lvl { get; }
 
-        public ChildTimer(string name, int lvl = 1)
+        private ChildTimer(string name, int lvl = 1)
         {
             Name = name;
-            Childs = new Queue<ChildTimer>();
+            Queue = new Queue<ChildTimer>();
             Lvl = lvl;
             Stopwatch = new Stopwatch();
             Stopwatch.Start();
@@ -101,14 +94,23 @@ namespace Memory.Timers
         public void Dispose()
         {
             Stopwatch.Stop();
-            RestTime = Stopwatch.ElapsedMilliseconds - Childs.Sum(child => child.Stopwatch.ElapsedMilliseconds);
+            RestTime = Stopwatch.ElapsedMilliseconds - Queue.Sum(child => child.Stopwatch.ElapsedMilliseconds);
+
+            Sb.Append(Timer.FormatReportLine(Name, Lvl, Stopwatch.ElapsedMilliseconds));
+            foreach (var child in Queue)
+                Sb.Append(Timer.FormatReportLine(child.Name, child.Lvl, child.Stopwatch.ElapsedMilliseconds));
+
+            if (Queue.Count > 0)
+                Sb.Append(Timer.FormatReportLine("Rest", Lvl + 1, RestTime));
         }
 
         public ChildTimer StartChildTimer(string name)
         {
             var child = new ChildTimer(name, Lvl + 1);
-            Childs.Enqueue(child);
+            Queue.Enqueue(child);
             return child;
         }
+
+        public static ChildTimer StartChildTimerStatic(string name) => new ChildTimer(name);
     }
 }
