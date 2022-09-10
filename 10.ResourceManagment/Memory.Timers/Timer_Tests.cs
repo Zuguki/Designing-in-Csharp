@@ -65,7 +65,7 @@ A                   : 0
     C               : 0
     Rest            : 0
 */
-        }
+         }
 
         [Test]
         public void DeepNestingStructure1()
