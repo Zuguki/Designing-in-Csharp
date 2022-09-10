@@ -54,9 +54,7 @@ namespace Memory.Timers
                 _stopwatch.Stop();
                 _writer.Write(FormatReportLine(_name, 0, _stopwatch.ElapsedMilliseconds));
                 foreach (var item in _queue)
-                {
                     _writer.Write(item.Sb.ToString());
-                }
 
                 if (_queue.Count > 0)
                     _writer.Write(FormatReportLine("Rest", 1,
